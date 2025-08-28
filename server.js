@@ -145,11 +145,20 @@ for (let route in adminPages) {
 // LOGIN ROUTE
 // =============================
 app.post('/login', (req, res) => {
+  let response = {
+    success: false,
+    message: "",
+    userId: null,
+    role: null,
+    redirectTo: null
+  };
+
   try {
     const { userId, password, role } = req.body;
 
     if (!userId || !password || !role) {
-      return res.status(400).json({ success: false, message: "Missing credentials" });
+      response.message = "Missing credentials";
+      return res.status(400).json(response);
     }
 
     pool.query(
@@ -158,11 +167,13 @@ app.post('/login', (req, res) => {
       (err, results) => {
         if (err) {
           console.error("❌ DB Query Error:", err);
-          return res.status(500).json({ success: false, message: "Database error" });
+          response.message = "Database error";
+          return res.status(500).json(response);
         }
 
         if (results.length === 0) {
-          return res.status(401).json({ success: false, message: 'Invalid credentials or role mismatch' });
+          response.message = 'Invalid credentials or role mismatch';
+          return res.status(401).json(response);
         }
 
         const user = results[0];
@@ -170,43 +181,46 @@ app.post('/login', (req, res) => {
         bcrypt.compare(password, user.password, (err2, isMatch) => {
           if (err2) {
             console.error("❌ Bcrypt Error:", err2);
-            return res.status(500).json({ success: false, message: "Password check error" });
+            response.message = "Password check error";
+            return res.status(500).json(response);
           }
 
           if (!isMatch) {
-            return res.status(401).json({ success: false, message: 'Incorrect password' });
+            response.message = 'Incorrect password';
+            return res.status(401).json(response);
           }
 
-          // ✅ Save Session
+          // ✅ Save session
           req.session.userId = userId;
           req.session.role = role;
 
-          // ✅ Role-based redirection
-          let redirectTo = "";
+          // ✅ Role-based redirect
           switch (role) {
-            case "student": redirectTo = `/student/${userId}`; break;
-            case "staff": redirectTo = `/staff/${userId}`; break;
-            case "admin": redirectTo = `/adminpanel`; break;
-            case "hod": redirectTo = `/hodpanel.html`; break;
-            case "exam": redirectTo = `/examcell`; break;
-            case "accounts": redirectTo = `/accounts.html`; break;
+            case "student": response.redirectTo = `/student/${userId}`; break;
+            case "staff": response.redirectTo = `/staff/${userId}`; break;
+            case "admin": response.redirectTo = `/adminpanel`; break;
+            case "hod": response.redirectTo = `/hodpanel.html`; break;
+            case "exam": response.redirectTo = `/examcell`; break;
+            case "accounts": response.redirectTo = `/accounts.html`; break;
           }
 
-          return res.status(200).json({
-            success: true,
-            message: 'Login successful',
-            userId,
-            role,
-            redirectTo
-          });
+          // ✅ Success response
+          response.success = true;
+          response.message = 'Login successful';
+          response.userId = userId;
+          response.role = role;
+
+          return res.status(200).json(response);
         });
       }
     );
   } catch (error) {
     console.error("🔥 Login route error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    response.message = "Server error";
+    return res.status(500).json(response);
   }
 });
+
 
 // =============================
 // ERROR HANDLERS (always JSON)
