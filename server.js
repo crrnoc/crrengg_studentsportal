@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const multer = require('multer');
 const adminRoutes = require("./admin");
-const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 
 
