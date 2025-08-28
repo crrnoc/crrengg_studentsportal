@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>✏️ Edit Attendance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  body {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(to right, #e0eafc, #cfdef3);
+    color: #222;
+    overflow-x: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #2C3E50, #34495E);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    color: white;
+    z-index: 100;
+  }
+  .sidebar h2 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 30px;
+    color: #3cb6ff;
+  }
+  .sidebar ul {
+    list-style: none;
+  }
+  .sidebar li {
+    display: block;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.1);
+  }
+  .sidebar li:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateX(5px);
+  }
+  .sidebar li.active {
+    background: rgba(255,255,255,0.3);
+    font-weight: bold;
+  }
+  .sidebar button {
+    background-color: #E67E22;
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 20px;
+    margin-top: auto;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .sidebar button:hover {
+    background-color: #CA6F1E;
+  }
+
+  /* Mobile toggle */
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #2C3E50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 200;
+  }
+
+  /* Main content */
+  .main {
+    flex: 1;
+    margin-left: 250px;
+    padding: 40px;
+    margin-top: 36px;
+    transition: filter 0.3s ease;
+  }
+  .main.shifted {
+    filter: blur(2px);
+    pointer-events: none;
+  }
+
+  /* Form elements */
+  label {
+    font-weight: bold;
+    margin-top: 15px;
+    display: block;
+  }
+  input, select {
+    padding: 8px;
+    width: 100%;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  button[type="submit"], #getAbsents {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button[type="submit"]:hover, #getAbsents:hover {
+    background: #0056b3;
+  }
+
+  /* Keep your original table style */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 15px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  th {
+    background-color: #007acc;
+    color: white;
+    font-weight: bold;
+  }
+  tr.absent {
+    background-color: #fff6f6;
+  }
+  button.mark {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button.mark[disabled] {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .sidebar { left: -250px; transition: 0.4s ease; }
+    .sidebar.open { left: 0; }
+    .mobile-toggle { display: block; }
+    .main { margin-left: 0; padding: 80px 20px 20px; }
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    tr { margin-bottom: 15px; }
+    td, th { text-align: left; }
+  }
+</style>
+
+</head>
+<body>
+
+<div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+<div class="sidebar" id="sidebar">
+  <h2>Admin Panel</h2>
+  <ul>
+      <li onclick="navigateTo('/uploadattendance')">🗓️ Upload Attendance</li>
+      <li onclick="navigateTo('/uploadmidmarks')">📈 Upload Mid Marks</li>
+      <li onclick="navigateTo('/addmycounselling')">👥 Assign Counselling</li>
+      <li onclick="navigateTo('/dumatch')">🔍 DU Match Status</li>
+      <li onclick="navigateTo('/removestudents')">🗑️ Delete Students</li>
+      <li onclick="navigateTo('/uploadstudents')">📚 Upload Student Data</li>
+      <li onclick="navigateTo('/staffallocation')">🧑‍🏫 Staff Period Allocation</li>
+      <li onclick="navigateTo('/downloadattendance')">📥 Download Attendance</li>
+      <li onclick="navigateTo('/editattendance')">✏️ Edit Attendance</li>
+      <li onclick="navigateTo('/sendsms')">📤 Send SMS</li>
+  </ul>
+  <button onclick="logout()">🚪 Logout</button>
+</div>
+<div class="main" id="main-content">
+  <h2 style="text-align:center; font-size:24px; color:#2c3e50; margin-bottom: 20px;">✏️ Edit Attendance</h2>
+
+  <label>Dept Code:
+    <input id="dept" value="CSE" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;" />
+  </label>
+
+  <label>Year:
+    <select id="year" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+      <option value="">Select</option>
+      <option>1</option><option>2</option><option>3</option><option>4</option>
+    </select>
+  </label>
+
+  <label>Course:
+    <select id="course" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+      <option value="">Select dept+year</option>
+    </select>
+  </label>
+
+  <label>Section:
+    <select id="section" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+      <option>Select course</option>
+    </select>
+  </label>
+
+  <label>Date:
+    <input type="date" id="date" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;" />
+  </label>
+
+  <button id="getAbsents" style="margin-top:10px; padding:10px 16px; background-color:#007acc; color:white; border:none; border-radius:6px; cursor:pointer;">Get Absents</button>
+
+  <div id="msg" style="color:red;margin-top:12px;"></div>
+
+  <table id="absentTable" style="display:none; margin-top:20px; background:white; border-radius:10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow:hidden;">
+    <thead style="background:#007acc; color:white;">
+      <tr>
+        <th>#</th>
+        <th>Regd.No</th>
+        <th>Name</th>
+        <th>Subject</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+  const deptInput = document.getElementById('dept');
+  const yearSelect = document.getElementById('year');
+  const courseSelect = document.getElementById('course');
+  const sectionSelect = document.getElementById('section');
+  const dateInput = document.getElementById('date');
+  const getBtn = document.getElementById('getAbsents');
+  const tbl = document.getElementById('absentTable');
+  const tbody = tbl.querySelector('tbody');
+  const msg = document.getElementById('msg');
+
+  // Load courses and sections
+  async function fetchCoursesSections() {
+    const dept = deptInput.value.trim();
+    const year = yearSelect.value;
+    if (!dept || !year) return;
+    try {
+      const res = await fetch(`/api/fetch-courses-sections?dept_code=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`);
+      if (!res.ok) throw new Error(await res.text());
+      const rows = await res.json();
+
+      const courses = [...new Set(rows.map(r => r.course))];
+      courseSelect.innerHTML = '<option value="">Select course</option>' + courses.map(c => `<option>${c}</option>`).join('');
+
+      sectionSelect.innerHTML = '<option value="">Select section</option>';
+      if (rows.length) {
+        const firstCourse = courses[0];
+        const secs = rows.filter(r => r.course === firstCourse).map(r => r.section);
+        sectionSelect.innerHTML = '<option value="">Select section</option>' + [...new Set(secs)].map(s => `<option>${s}</option>`).join('');
+      }
+    } catch (e) {
+      msg.textContent = 'Error fetching courses/sections';
+      console.error(e);
+    }
+  }
+
+  deptInput.addEventListener('change', fetchCoursesSections);
+  yearSelect.addEventListener('change', fetchCoursesSections);
+
+  courseSelect.addEventListener('change', async () => {
+    const dept = deptInput.value.trim();
+    const year = yearSelect.value;
+    const course = courseSelect.value;
+    if (!dept || !year || !course) return;
+
+    try {
+      const res = await fetch(`/api/fetch-courses-sections?dept_code=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`);
+      const rows = await res.json();
+      const secs = rows.filter(r => r.course === course).map(r => r.section);
+      sectionSelect.innerHTML = '<option value="">Select section</option>' + [...new Set(secs)].map(s => `<option>${s}</option>`).join('');
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  getBtn.addEventListener('click', async () => {
+    msg.textContent = '';
+    tbody.innerHTML = '';
+    const year = yearSelect.value;
+    const course = courseSelect.value;
+    const section = sectionSelect.value;
+    const date = dateInput.value;
+    if (!year || !course || !section || !date) {
+      msg.textContent = 'Fill all fields';
+      return;
+    }
+
+    getBtn.disabled = true;
+    try {
+      const q = `/api/get-absents?year=${encodeURIComponent(year)}&course=${encodeURIComponent(course)}&section=${encodeURIComponent(section)}&date=${encodeURIComponent(date)}`;
+      const res = await fetch(q);
+      if (!res.ok) throw new Error(await res.text());
+      const rows = await res.json();
+      if (!rows.length) {
+        msg.textContent = 'No absents found';
+        tbl.style.display = 'none';
+        getBtn.disabled = false;
+        return;
+      }
+
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'absent';
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${r.reg_no}</td>
+          <td>${r.name || '-'}</td>
+          <td>${r.subject}</td>
+          <td>${r.date}</td>
+          <td class="status">${r.status}</td>
+          <td><button class="mark" data-id="${r.id}">Mark Present</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      tbl.style.display = 'table';
+    } catch (e) {
+      msg.textContent = 'Error fetching absents';
+      console.error(e);
+    } finally {
+      getBtn.disabled = false;
+    }
+  });
+
+  // Mark Present
+  tbody.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('button.mark');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (!id) return;
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+    try {
+      const res = await fetch('/api/mark-present', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendance_id: id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Server error');
+      if (data.updated) {
+        const tr = btn.closest('tr');
+        tr.querySelector('.status').textContent = 'Present';
+        btn.disabled = true;
+        btn.textContent = 'Present';
+        tr.classList.remove('absent');
+      } else {
+        btn.textContent = 'Already Present';
+      }
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = 'Mark Present';
+      alert('Failed to update');
+    }
+  });
+
+  // Sidebar toggle
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("main-content").classList.toggle("shifted");
+  }
+
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+
+  function logout() {
+    fetch("/logout")
+      .then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        alert("Logout failed. Try again.");
+      });
+  }
+
+  // Prevent back nav after logout
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = function () {
+    window.history.pushState(null, "", window.location.href);
+  };
+</script>
+</body>
+</html>

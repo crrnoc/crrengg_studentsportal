@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRR Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #3cb6ff;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
+
+    .sidebar li.active {
+      background: rgba(255,255,255,0.3);
+      font-weight: bold;
+    }
+
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 40px;
+      margin-top: 36px;
+      transition: filter 0.3s ease;
+    }
+
+    .main.shifted {
+      filter: blur(2px);
+      pointer-events: none;
+    }
+
+    .banner {
+      background: linear-gradient(135deg, #5bc0de, #3c96c8);
+      padding: 30px;
+      border-radius: 20px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      margin: 0 auto 30px;
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { left: -250px; transition: 0.4s ease; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .main { margin-left: 0; padding: 80px 20px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li onclick="navigateTo('/uploadattendance')">🗓️ Upload Attendance</li>
+      <li onclick="navigateTo('/uploadmidmarks')">📈 Upload Mid Marks</li>
+      <li onclick="navigateTo('/addmycounselling')">👥 Assign Counselling</li>
+      <li onclick="navigateTo('/dumatch')">🔍 DU Match Status</li>
+      <li onclick="navigateTo('/removestudents')">🗑️ Delete Students</li>
+      <li onclick="navigateTo('/uploadstudents')">📚 Upload Student Data</li>
+      <li onclick="navigateTo('/staffallocation')">🧑‍🏫 Staff Period Allocation</li>
+      <li onclick="navigateTo('/downloadattendance')">📥 Download Attendance</li>
+      <li onclick="navigateTo('/editattendance')">✏️ Edit Attendance</li>
+      <li onclick="navigateTo('/sendsms')">📤 Send SMS</li>
+    </ul>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="main" id="main-content">
+    <div class="banner">🚀 WELCOME TO CRR NOC ADMIN PANEL</div>
+    <p style="text-align:center; font-size: 18px; line-height: 1.6;">
+      Use the sidebar to navigate between modules like <b>Uploading SBI DU References</b>, checking <b>DU Match Status</b>, verifying <b>NOC Eligibility</b>, and <b>Deleting Students</b>.
+      <br><br>Each section is now optimized in its own page for better performance and maintainability.
+    </p>
+  </div>
+
+<script>
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first.");
+    window.location.href = "index.html";
+  }
+
+  function navigateTo(route) {
+    // If your pages are HTML files like 'uploadattendanceAd.html', use those names:
+    // window.location.href = route + ".html";
+    window.location.href = route;
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main-content");
+    sidebar.classList.toggle("open");
+    main.classList.toggle("shifted");
+  }
+
+  function logout() {
+    fetch("/logout")
+      .then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        alert("Logout failed. Try again.");
+      });
+  }
+
+  // 🔒 Prevent back button navigation after logout
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = function () {
+    window.history.pushState(null, "", window.location.href);
+  };
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+

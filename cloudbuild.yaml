@@ -1,0 +1,11 @@
+steps:
+  # Step 1: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/crr-noc', '.']
+
+  # Step 2: Push image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/crr-noc']
+
+options:
+  logging: CLOUD_LOGGING_ONLY   # 👈 avoids the logs bucket issue

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Details</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #2e2e2e;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+.photo-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+
+.home-icon {
+  margin-top: 35px;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #fff;
+  border-radius: 50%;
+  font-size: 22px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  color: #000;
+  transition: transform 0.2s ease;
+}
+
+.home-icon:hover {
+  transform: scale(1.1);
+  background-color: #f09000;
+  color: white;
+}
+    .sidebar {
+      width: 270px;
+      background-color: rgb(247, 201, 155);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      transition: top 0.3s ease-in-out;
+      z-index: 999;
+    }
+
+    .sidebar h2 {
+      margin: 40px 20px 20px 20px;
+      color: black;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .sidebar-photo {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  border: 3px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+    .menu {
+      list-style: none;
+      padding: 0;
+    }
+
+    .menu li {
+      list-style: none;
+      margin-bottom: 15px;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .menu li a:hover,
+    .menu li.active a {
+      background-color: #d4d4d4;
+      font-weight: bold;
+      transform: translateX(5px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu li a span {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu li a:hover span {
+      transform: scale(1.2);
+    }
+
+    .logout {
+      background-color: #f09000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 50%;
+      margin: 20px auto 0;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover {
+      background-color: #d07900;
+    }
+
+    .main-section {
+      flex-grow: 1;
+      background-color: white;
+      padding: 40px 20px;
+      margin-left: 270px;
+    }
+
+    .main-section h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+       .bar-card {
+  position: relative;
+}
+
+.bar-card[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+    .bar-card {
+      width: 90%;
+      max-width: 400px;
+      margin: 20px auto;
+      background: #f0f4f8;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .bar-card:hover {
+      transform: scale(1.02);
+    }
+
+    .bar-label {
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .bar-outer {
+      background: #e0e0e0;
+      border-radius: 30px;
+      overflow: hidden;
+      height: 25px;
+    }
+
+    .bar-inner {
+      height: 100%;
+      line-height: 25px;
+      text-align: right;
+      padding-right: 10px;
+      color: white;
+      font-weight: bold;
+      border-radius: 30px;
+      transition: width 1s ease-in-out;
+    }
+
+    .percent-bar {
+      background: linear-gradient(to right, #17a2b8, #7ee8f7);
+    }
+
+    .cgpa-bar.green { background: linear-gradient(to right, #28a745, #a2e35d); }
+    .cgpa-bar.blue { background: linear-gradient(to right, #007bff, #5ac8fa); }
+    .cgpa-bar.orange { background: linear-gradient(to right, #fd7e14, #fbc687); }
+    .cgpa-bar.red { background: linear-gradient(to right, #dc3545, #ff8a9f); }
+    .cgpa-bar.gray { background: linear-gradient(to right, #6c757d, #ced4da); }
+
+    select#semester {
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: linear-gradient(to right, #ffffff, #f0f0f0);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+select#semester:hover {
+  border-color: #007bff;
+  background: #e6f0ff;
+}
+
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1f75cb;
+      color: white;
+      font-size: 24px;
+      padding: 12px 18px;
+      border-radius: 50px;
+      z-index: 9999;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        top: -100%;
+        left: 0;
+        width: 100%;
+        max-height: 90vh;
+      }
+
+      .sidebar.open {
+        top: 0;
+      }
+
+      .main-section {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="photo-container">
+  <div class="photo-wrapper">
+    <a href="studentwelcome.html" class="home-icon" title="Home">🏠</a>
+    <img id="sidebarPhoto" class="sidebar-photo" style="display: none;" />
+  </div>
+</div>
+
+      <h2>ID: <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="studentdetails.html"><span>📄</span> Student details</a></li>
+        <li><a href="feedetails.html"><span>🎓</span> Fee details</a></li>
+        <li><a href="updaterefno.html"><span>🔄</span> Update fee payment</a></li>
+        <li><a href="attendence.html"><span>📅</span> View Attendance</a></li>
+        <li class="active"><a href="#"><span>📊</span> Student Results</a></li>
+        <li><a href="generatenoc.html"><span>➕</span> Generate NOC</a></li>
+        <li><a href="settings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-section">
+      <h2>View Semester Results</h2>
+<div style="text-align:center;">
+
+     <div id="overallStatsContainer" class="stats-circles"></div>
+      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; margin-top: 20px;">
+  <div id="overallStatsContainerLeft" style="flex: 1; min-width: 250px;"></div>
+
+  <div style="text-align: center; padding: 10px;">
+    <label for="semester">Select Semester:</label>
+    <select id="semester" onchange="fetchResults()" style="margin-top: 5px;">
+      <option value="">--Select Semester--</option>
+      <option value="1-1">1-1</option>
+      <option value="1-2">1-2</option>
+      <option value="2-1">2-1</option>
+      <option value="2-2">2-2</option>
+      <option value="3-1">3-1</option>
+      <option value="3-2">3-2</option>
+      <option value="4-1">4-1</option>
+      <option value="4-2">4-2</option>
+    </select>
+  </div>
+
+  <div id="overallStatsContainerRight" style="flex: 1; min-width: 250px;"></div>
+</div>
+
+      </div>
+      <div id="resultContainer"></div>
+    </div>
+  </div>
+
+  <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+<script>
+  // Unauthorized login check
+  const userId = localStorage.getItem("userId") || localStorage.getItem("regno");
+  if (!userId) {
+    alert("Please login first.");
+    window.location.href = "index.html";
+  }
+
+  function toggleMobileMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+  }
+
+  document.querySelectorAll(".menu li a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    document.getElementById("userId").textContent = userId;
+
+    // ✅ Sidebar Photo Load
+    fetch(`/student/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        const photo = document.getElementById("sidebarPhoto");
+        if (photo && data.photo_url) {
+          photo.src = data.photo_url;
+          photo.style.display = "block";
+        }
+      })
+      .catch(err => {
+        console.warn("⚠️ Failed to load sidebar photo:", err.message);
+      });
+
+    // 🟢 Overall stats (top circles)
+    try {
+      const res = await fetch(`/student/overallResults/${userId}`);
+      const data = await res.json();
+      if (data && data.sgpa && data.percentage) {
+        const leftDiv = document.getElementById("overallStatsContainerLeft");
+        const rightDiv = document.getElementById("overallStatsContainerRight");
+
+        const cgpa = parseFloat(data.sgpa).toFixed(2);
+        const percent = parseFloat(data.percentage).toFixed(2);
+
+        let cgpaColor = "gray";
+        if (cgpa >= 7.5) cgpaColor = "green";
+        else if (cgpa >= 6.5) cgpaColor = "blue";
+        else if (cgpa >= 5.5) cgpaColor = "orange";
+        else if (cgpa >= 5.0) cgpaColor = "red";
+
+        leftDiv.innerHTML = `
+          <div class="bar-card">
+            <div class="bar-label">Overall CGPA</div>
+            <div class="bar-outer">
+              <div class="bar-inner cgpa-bar ${cgpaColor}" style="width: 0%">0</div>
+            </div>
+          </div>
+        `;
+
+        rightDiv.innerHTML = `
+          <div class="bar-card">
+            <div class="bar-label">Overall Percentage</div>
+            <div class="bar-outer">
+              <div class="bar-inner percent-bar" style="width: 0%">0%</div>
+            </div>
+          </div>
+        `;
+
+        setTimeout(() => {
+          document.querySelector(".cgpa-bar").style.width = (cgpa * 10) + "%";
+          document.querySelector(".cgpa-bar").textContent = cgpa;
+
+          document.querySelector(".percent-bar").style.width = percent + "%";
+          document.querySelector(".percent-bar").textContent = percent + "%";
+        }, 100);
+      }
+    } catch (err) {
+      console.error("Error loading overall stats:", err);
+    }
+  });
+
+  async function fetchResults() {
+    const regno = localStorage.getItem("regno") || localStorage.getItem("userId");
+    const semester = document.getElementById("semester").value;
+    const container = document.getElementById("resultContainer");
+
+    container.innerHTML = "";
+
+    if (!regno) {
+      container.innerHTML = "<p class='error'>Student not logged in. Please login first.</p>";
+      return;
+    }
+
+    if (!semester) {
+      container.innerHTML = "<p class='error'>Please select a semester.</p>";
+      return;
+    }
+
+    try {
+      container.innerHTML = "<p>Loading results...</p>";
+      const response = await fetch(`/student/results/${regno}?semester=${semester}`);
+      const data = await response.json();
+
+      if (!data.results || data.results.length === 0) {
+        container.innerHTML = "<p class='error'>No results found for this semester.</p>";
+        return;
+      }
+
+      let html = `
+      <div style="display: flex; justify-content: center; margin-top: 20px;">
+        <div style="
+          background: white;
+          border-radius: 20px;
+          padding: 20px;
+          width: 90%;
+          max-width: 800px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        ">
+          <h3 style="text-align:center; color:#1f75cb; margin-bottom: 20px;">Results for <strong>${data.regno}</strong> - Semester <strong>${data.semester}</strong></h3>
+
+          <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+            <div><strong>SGPA:</strong> ${data.sgpa}</div>
+            <div><strong>Percentage:</strong> ${data.percentage}%</div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr style="background: #1f75cb; color: white;">
+                <th style="padding: 10px;">Subject Code</th>
+                <th style="padding: 10px;">Subject Name</th>
+                <th style="padding: 10px;">Grade</th>
+                <th style="padding: 10px;">Credits</th>
+              </tr>
+      `;
+
+      data.results.forEach(row => {
+        html += `
+              <tr style="text-align: center;">
+                <td style="padding: 8px;">${row.subcode}</td>
+                <td style="padding: 8px;">${row.subname || '-'}</td>
+                <td style="padding: 8px;">${row.grade}</td>
+                <td style="padding: 8px;">${row.credits}</td>
+              </tr>`;
+      });
+
+      html += `</table>
+        <div style="text-align: center; margin-top: 25px;">
+          <button onclick="window.print()" style="padding:10px 20px; margin:5px; background-color:#007BFF; color:white; border:none; border-radius:6px; cursor:pointer;">🖨️ Print</button>
+          <button onclick="downloadFormattedResult('${regno}', '${semester}')" style="padding:10px 20px; margin:5px; background-color:#28a745; color:white; border:none; border-radius:6px; cursor:pointer;">🏆 Generate Certificate</button>
+        </div>
+      `;
+
+      container.innerHTML = html;
+
+    } catch (err) {
+      console.error("Error fetching results:", err);
+      container.innerHTML = "<p class='error'>Error fetching results. Please try again later.</p>";
+    }
+  }
+
+  function downloadFormattedResult(regno, semester) {
+    if (!regno || !semester) {
+      alert("Student ID or semester missing!");
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = `/generate-certificate/${regno}?semester=${semester}`;
+    link.download = `Result_${regno}_${semester}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function logout() {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("regno");
+    if ('caches' in window) {
+      caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    }
+    window.location.replace("index.html");
+  }
+</script>
+  
+</body>
+</html>
+

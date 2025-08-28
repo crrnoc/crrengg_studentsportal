@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Period Adjustment</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {font-family: Arial, sans-serif; background:#f6f6f6; margin:0; padding:20px;}
+    .container {
+      max-width:700px; margin:auto; background:#fff; padding:25px;
+      border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {text-align:center; margin-bottom:20px; color:#0b5394;}
+    .form-row {display:flex; flex-direction:column; margin-bottom:15px;}
+    label {font-weight:600; margin-bottom:6px;}
+    select, input[type="date"] {
+      padding:8px; border:1px solid #ccc; border-radius:8px; font-size:14px;
+    }
+    button {
+      background:#1f75cb; color:white; border:none; padding:10px 16px;
+      border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s;
+    }
+    button:hover {background:#15559b;}
+    option[disabled] {color:#999;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔄 Period Adjustment</h2>
+    <form id="adjustForm">
+      <div class="form-row">
+        <label>Course:</label>
+        <select id="courseSelect" required></select>
+      </div>
+      <div class="form-row">
+        <label>Year:</label>
+        <select id="yearSelect" required></select>
+      </div>
+      <div class="form-row">
+        <label>Semester:</label>
+        <select id="semesterSelect" required></select>
+      </div>
+      <div class="form-row">
+        <label>Section:</label>
+        <select id="sectionSelect" required></select>
+      </div>
+      <div class="form-row">
+        <label>Day:</label>
+        <select id="daySelect" required></select>
+      </div>
+      <div class="form-row">
+        <label>Date:</label>
+        <input type="date" id="adjustDate" required>
+      </div>
+      <div class="form-row">
+        <label>Period:</label>
+        <select id="periodSelect" required></select>
+      </div>
+
+      <div class="form-row">
+        <label>Assign To (Staff):</label>
+        <select id="staffSelect" required></select>
+      </div>
+
+      <!-- 🆕 Subject Dropdown -->
+      <div class="form-row">
+        <label>Subject:</label>
+        <select id="subjectSelect" required>
+          <option value="">-- Select Subject --</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <button type="submit">✅ Save Adjustment</button>
+      </div>
+
+    </form>
+  </div>
+
+<script>
+  const staff_id = localStorage.getItem("staff_id");
+
+  // Load staff allocation on page load
+  window.onload = () => {
+    fetch(`/api/staff-allocation?staff_id=${staff_id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.length) {
+          Swal.fire("❌ No Allocation Found", "Contact admin.", "info");
+          return;
+        }
+
+        // Populate course/year/semester/section/day dropdowns
+        const unique = (arr, key) => [...new Set(arr.map(r => r[key]))];
+        courseSelect.innerHTML = unique(data, "course").map(c => `<option>${c}</option>`).join('');
+        yearSelect.innerHTML = unique(data, "year").map(y => `<option>${y}</option>`).join('');
+        semesterSelect.innerHTML = unique(data, "semester").map(s => `<option>${s}</option>`).join('');
+        sectionSelect.innerHTML = unique(data, "section").map(s => `<option>${s}</option>`).join('');
+        daySelect.innerHTML = unique(data, "day").map(d => `<option>${d}</option>`).join('');
+
+        // Load periods when day selected
+        daySelect.addEventListener("change", () => {
+          const course = courseSelect.value.trim();
+          const year = yearSelect.value.trim();
+          const semester = semesterSelect.value.trim();
+          const section = sectionSelect.value.trim();
+          const day = daySelect.value.trim();
+
+          const matches = data.filter(r =>
+            r.course.trim() === course &&
+            r.year.toString().trim() === year &&
+            r.semester.toString().trim() === semester &&
+            r.section.trim() === section &&
+            r.day.trim() === day
+          );
+
+          let options = "";
+          matches.forEach(m => {
+            for (let i=1; i<=7; i++) {
+              const sub = m[`period${i}`];
+              if (sub) options += `<option value="${i}">${i}ᵗʰ Period - ${sub}</option>`;
+            }
+          });
+
+          periodSelect.innerHTML = options || `<option>No Periods</option>`;
+        });
+
+        // Load staff list dynamically
+        [courseSelect, yearSelect, semesterSelect, sectionSelect, daySelect, periodSelect]
+          .forEach(el => el.addEventListener("change", loadStaffList));
+      });
+  };
+
+  // Fetch staff list for selected section & disable busy staff
+  function loadStaffList() {
+    const course = courseSelect.value;
+    const year = yearSelect.value;
+    const semester = semesterSelect.value;
+    const section = sectionSelect.value;
+    const day = daySelect.value;
+    const period_no = periodSelect.value;
+
+    if (!course || !year || !semester || !section || !day || !period_no) return;
+
+    fetch(`/api/staff-in-section?course=${course}&year=${year}&semester=${semester}&section=${section}&day=${day}&period=${period_no}`)
+      .then(res => res.json())
+      .then(staffs => {
+        staffSelect.innerHTML = staffs
+          .filter(s => s.staff_id !== staff_id)
+          .map(s => s.busy
+            ? `<option value="${s.staff_id}" disabled>${s.staff_name} (Busy)</option>`
+            : `<option value="${s.staff_id}">${s.staff_name}</option>`
+          )
+          .join('');
+      });
+  }
+
+  // Fetch subjects when staff changes
+  staffSelect.addEventListener("change", () => {
+    const course = courseSelect.value;
+    const year = yearSelect.value;
+    const semester = semesterSelect.value;
+    const section = sectionSelect.value;
+    const staffId = staffSelect.value;
+
+    if (!staffId) {
+      subjectSelect.innerHTML = `<option value="">-- Select Subject --</option>`;
+      return;
+    }
+
+    fetch(`/api/staff-subjects?staff_id=${staffId}&course=${course}&year=${year}&semester=${semester}&section=${section}`)
+      .then(res => res.json())
+      .then(subjects => {
+        if (subjects.length === 0) {
+          subjectSelect.innerHTML = `<option value="">No subjects found</option>`;
+          return;
+        }
+
+        subjectSelect.innerHTML = subjects
+          .map(s => `<option value="${s.subject}">${s.subject}</option>`)
+          .join('');
+      })
+      .catch(err => {
+        console.error("Error fetching subjects:", err);
+        Swal.fire("❌ Error", "Failed to fetch subjects. Try again.", "error");
+      });
+  });
+
+  // Submit adjustment request
+  adjustForm.onsubmit = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      from_staff_id: staff_id,
+      to_staff_id: staffSelect.value,
+      course: courseSelect.value,
+      year: yearSelect.value,
+      section: sectionSelect.value,
+      semester: semesterSelect.value,
+      day: daySelect.value,
+      date: adjustDate.value,
+      period_no: periodSelect.value,
+      subject: subjectSelect.value
+    };
+
+    const res = await fetch("/api/adjust-period", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      Swal.fire("✅ Success", result.message || "Period adjustment saved successfully!", "success");
+      adjustForm.reset();
+    } else {
+      Swal.fire("❌ Failed", result.error || "Unknown error", "error");
+    }
+  };
+</script>
+</body>
+</html>

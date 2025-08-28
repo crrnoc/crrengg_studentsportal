@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Portal Login | Sir C.R. Reddy College of Engineering</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <style>
+    :root {
+      --main-color: #3cb6ff;
+      --accent-color: #ff3d3d;
+      --text-light: #fefefe;
+      --glow: 0 0 15px var(--main-color);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: url('https://upload.wikimedia.org/wikipedia/commons/9/92/C.R.Reddy_College_Aerial_View.jpg') no-repeat center center/cover;
+      height: 100dvh;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 🔹 Darker overlay to reduce brightness */
+    .overlay {
+      background: rgba(0, 0, 0, 0.6);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .main-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    .branding {
+      text-align: center;
+      color: white;
+      animation: popIn 1.2s ease forwards;
+      margin-top: 40px;  /* 🔹 moved logo + heading down */
+    }
+
+    .branding .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .branding img {
+      width: 70px;
+      margin-bottom: 0;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+      animation: logoFloat 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes logoFloat {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-6px); filter: drop-shadow(0 0 12px rgba(255,255,255,0.9)); }
+    }
+
+    .branding h1 {
+      font-size: 28px;
+      text-shadow: var(--glow);
+    }
+
+    .accreditation {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #a0e7ff;
+      font-weight: 500;
+      text-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      animation: fadeIn 1.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 🔹 Student Management System heading */
+    .system-heading {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      text-align: center;
+      text-shadow: 0 0 12px rgba(60,182,255,0.8);
+    }
+
+    .role-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin: 15px 0;
+    }
+
+    /* 🔹 Bigger role buttons */
+    .role-button {
+      padding: 16px 32px;
+      font-size: 18px;
+      border-radius: 14px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 0px solid transparent;
+      cursor: pointer;
+      transition: 0.3s ease;
+      position: relative;
+    }
+
+    .role-button::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 0;
+      background: var(--main-color);
+      transition: 0.3s ease;
+    }
+
+    .role-button:hover::after, .role-button.active::after {
+      width: 100%;
+    }
+
+    .role-button:hover, .role-button.active {
+      border: 1.5px solid var(--main-color);
+      background: rgba(60, 182, 255, 0.2);
+      box-shadow: 0 0 12px var(--main-color);
+    }
+
+    #mission-vision {
+      max-width: 700px;
+      max-height: 150px;
+      margin-top: 15px;
+      text-align: center;
+      color: white;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    #mission-vision::-webkit-scrollbar {
+      display: none;
+    }
+
+    #mission-vision h2 {
+      color: #00eaff;
+      margin-top: 20px;
+    }
+
+    #mission-vision p {
+      margin-top: 10px;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    /* 🔹 Smaller login container */
+    .login-container {
+      display: none;
+      opacity: 0;
+      transform: translateY(100px) scale(0.95);
+      transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+      max-width: 320px;   /* was 380px */
+      width: 90%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px; /* was 20px */
+      padding: 18px;       /* was 25px */
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 25px rgba(0,191,255,0.2);
+      margin-top: 5px;
+    }
+
+    .login-container.show {
+      display: block !important;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .login-container h2 {
+      color: white;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .login-container input::placeholder {
+      color: #ccc;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--main-color), var(--accent-color));
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 0 15px var(--main-color);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .login-container button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 25px var(--accent-color);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      color: #ccc;
+      font-size: 13px;
+      background: rgba(0, 0, 0, 0.6);
+      padding-top: 3px;
+    }
+
+    @media (max-width: 480px) {
+      .login-container { margin: 20px; padding: 16px; }
+      .branding h1 { font-size: 20px; }
+      .role-button { font-size: 16px; padding: 14px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <main class="main-wrapper" id="mainWrapper">
+
+    <!-- Branding -->
+    <div class="branding">
+      <div class="brand-row">
+        <img src="crrengglogo.png" alt="CRR Logo" />
+        <h1>Sir C.R. Reddy College of Engineering</h1>
+      </div>
+      <div class="accreditation">
+        <span>🎖️ NAAC A Grade Accredited</span> |
+        <span>🏛️ Autonomous Institution</span> |
+        <span>🎓 Affiliated to JNTU-Kakinada</span> |
+        <span>🏅Accredited by NBA</span>
+      </div>
+    </div>
+
+    <!-- Student Management System heading -->
+    <div class="system-heading">STUDENT MANAGEMENT SYSTEM</div>
+
+    <!-- Role Selection -->
+    <div class="role-buttons">
+      <div class="role-button" data-role="student">👨‍🎓 Student</div>
+      <div class="role-button" data-role="staff">👨‍🏫 Staff</div>
+      <div class="role-button" data-role="admin">🛡️ Admin</div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div id="mission-vision">
+      <h2>Our Vision</h2>
+      <p>To emerge as a premier institution in the field of technical education and research in the state and as a home for holistic development of the students and contribute to the advancement of society and the region.</p>
+      <h2>Our Mission</h2>
+      <p>To provide high quality technical education through a creative balance of academic and industry oriented learning; to create an inspiring environment of scholarship and research; to instill high levels of academic and professional discipline; and to establish standards that inculcate ethical and moral values that contribute to growth in career and development of society in general.</p>
+    </div>
+
+    <!-- Student Login -->
+    <div class="login-container hidden" id="student-login">
+      <h2>Student Login</h2>
+      <form onsubmit="submitLogin(event, 'student')">
+        <input type="text" placeholder="Enter Student ID" required />
+        <input type="password" placeholder="Enter Password" required />
+        <div style="text-align: right; margin: -10px 0 15px;">
+          <a href="forgotpassword.html" style="color: #3cb6ff; font-size: 14px;">Forgot Password?</a>
+        </div>
+        <button type="submit">Login as Student</button>
+      </form>
+    </div>
+
+    <!-- Staff Login -->
+    <div class="login-container hidden" id="staff-login">
+      <h2>Staff Login</h2>
+      <form onsubmit="submitLogin(event, 'staff')">
+        <input type="text" placeholder="Enter Staff ID" required />
+        <input type="password" placeholder="Enter Password" required />
+        <div style="text-align: right; margin: -10px 0 15px;">
+          <a href="forgotpassword.html" style="color: #3cb6ff; font-size: 14px;">Forgot Password?</a>
+        </div>
+        <button type="submit">Login as Staff</button>
+      </form>
+    </div>
+
+    <!-- Admin Role Options -->
+    <div class="login-container hidden" id="admin-role-options">
+      <h2>Select Admin Role</h2>
+      <div class="role-buttons" style="margin-top: 15px; flex-direction: column; align-items: center;">
+        <div class="role-button" data-subrole="admin">👤 Administrator</div>
+        <div class="role-button" data-subrole="hod">🏫 Dept HOD</div>
+        <div class="role-button" data-subrole="exam">📚 Examination Cell</div>
+        <div class="role-button" data-subrole="accounts">💰 Accounts</div>
+      </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div class="login-container hidden" id="admin-login">
+      <h2>Admin Login</h2>
+      <form onsubmit="submitLogin(event, 'admin')">
+        <input type="text" placeholder="Enter Admin ID" required />
+        <input type="password" placeholder="Enter Password" required />
+        <div style="text-align: right; margin: -10px 0 15px;">
+          <a href="forgotpassword.html" style="color: #3cb6ff; font-size: 14px;">Forgot Password?</a>
+        </div>
+        <button type="submit">Login as Admin</button>
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <div class="footer">
+    Developed by Cyber Security (2023-2027) Batch Students | <a href="privacypolicy.html">Privacy Policy</a>
+  </div>
+
+  <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  const buttons = document.querySelectorAll('.role-button');
+  const wrapper = document.getElementById('mainWrapper');
+
+  const containers = {
+    student: document.getElementById("student-login"),
+    staff: document.getElementById("staff-login"),
+    admin: document.getElementById("admin-role-options")
+  };
+
+  const adminLoginContainer = document.getElementById("admin-login");
+  const adminLoginHeading = adminLoginContainer.querySelector("h2");
+  const adminLoginButton = adminLoginContainer.querySelector("button");
+  let selectedAdminRole = "";
+
+  function hideAll() {
+    Object.values(containers).forEach(el => {
+      el.classList.remove("show");
+      el.classList.add("hidden");
+    });
+    adminLoginContainer.classList.remove("show");
+    adminLoginContainer.classList.add("hidden");
+  }
+
+  buttons.forEach(btn => {
+    const role = btn.dataset.role;
+    const subrole = btn.dataset.subrole;
+
+    btn.addEventListener("click", () => {
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      wrapper.classList.add('shift-up');
+      document.getElementById("mission-vision").style.display = "none";
+
+      if (role === "admin") {
+        hideAll();
+        setTimeout(() => {
+          containers.admin.classList.remove("hidden");
+          containers.admin.classList.add("show");
+        }, 400);
+      } else if (role) {
+        hideAll();
+        setTimeout(() => {
+          containers[role].classList.remove("hidden");
+          containers[role].classList.add("show");
+        }, 400);
+      }
+
+      if (subrole) {
+        selectedAdminRole = subrole;
+
+        const roleNames = {
+          admin: "Administrator",
+          hod: "HOD",
+          exam: "Exam Cell",
+          accounts: "Accounts"
+        };
+
+        const displayRole = roleNames[selectedAdminRole] || "Admin";
+
+        adminLoginHeading.textContent = `${displayRole} Login`;
+        adminLoginButton.textContent = `Login as ${displayRole}`;
+
+        hideAll();
+        setTimeout(() => {
+          adminLoginContainer.classList.add("show");
+        }, 400);
+      }
+    });
+  });
+
+  hideAll();
+
+  async function submitLogin(event, role) {
+    event.preventDefault();
+
+    const form = event.target;
+    const userId = form.querySelector('input[type="text"]').value.trim();
+    const password = form.querySelector('input[type="password"]').value.trim();
+
+    let actualRole = role;
+    if (role === "admin") actualRole = selectedAdminRole;
+
+    const payload = { userId, password, role: actualRole };
+
+    Swal.fire({
+      title: "Logging in...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    let response;
+    try {
+      response = await Promise.race([
+        fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Network Timeout")), 7000))
+      ]);
+    } catch (err) {
+      Swal.close();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Network Issue',
+        text: 'Login is taking too long. Please check your internet and try again.',
+        confirmButtonColor: '#f39c12'
+      });
+      return;
+    }
+
+    const data = await response.json();
+    Swal.close();
+
+    if (data.success) {
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("role", actualRole);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Login Successful',
+        text: `Welcome ${actualRole.toUpperCase()} - ${data.userId}`,
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      if (actualRole === "student") {
+        localStorage.setItem("regno", data.userId);
+        window.location.href = "studentwelcome.html";
+      } else if (actualRole === "staff") {
+        window.location.href = "knowaboutstd1.html";
+      } else if (actualRole === "admin") {
+        window.location.href = "/adminpanel";
+      } else if (actualRole === "hod") {
+        window.location.href = "hodpanel.html";
+      } else if (actualRole === "exam") {
+        window.location.href = "examcell.html";
+      } else if (actualRole === "accounts") {
+        window.location.href = "accountspanel.html";
+      }
+
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: data.message || 'Invalid credentials. Please try again.',
+        confirmButtonColor: '#d33'
+      });
+    }
+  }
+</script>
+</body>
+</html>

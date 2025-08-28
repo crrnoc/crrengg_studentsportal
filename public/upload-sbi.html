@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📤 Upload SBI References</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="crrengglogo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #3cb6ff;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 60px 20px;
+    }
+
+    .card {
+      background: white;
+      max-width: 600px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .file-label {
+      display: inline-block;
+      background-color: #3498DB;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    button.upload-btn {
+      background: #3cb6ff;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button.upload-btn:hover {
+      background: #2fa0e3;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        left: -250px;
+        transition: 0.4s ease;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 80px 20px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Accounts Panel</h2>
+    <ul>
+      <li onclick="navigateTo('/uploadsbi')">🏦 Upload SBI References</li>
+      <li onclick="navigateTo('/nocstatus')">📄 NOC Status</li>
+      <li onclick="navigateTo('/createnoc')">🧾 Create NOC</li>
+      <li onclick="navigateTo('/studentsfeesearch')">🔍 Student Fee Search</li>
+    </ul>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <h2>📎 Upload SBI DU Reference Numbers</h2>
+      <label for="sbiFile" class="file-label">Choose File</label>
+      <input type="file" id="sbiFile" accept=".txt,.csv" />
+      <span id="fileName"></span>
+      <br />
+      <button class="upload-btn" onclick="uploadSBI()">Upload</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("open");
+    }
+
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+
+
+    function logout() {
+      fetch("/logout").then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      });
+    }
+
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = () => window.history.pushState(null, "", window.location.href);
+
+    document.getElementById("sbiFile").addEventListener("change", function () {
+      document.getElementById("fileName").textContent = this.files[0]?.name || "";
+    });
+
+    function uploadSBI() {
+      const file = document.getElementById("sbiFile").files[0];
+      if (!file) {
+        return Swal.fire("No File Selected", "Please choose a file first.", "warning");
+      }
+
+      const formData = new FormData();
+      formData.append("sbiFile", file);
+
+      fetch("/admin/upload-sbi", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          Swal.fire("Upload Result", data.message || "Upload complete!", "success");
+        })
+        .catch(() => Swal.fire("Error", "Upload failed.", "error"));
+    }
+  </script>
+</body>
+</html>

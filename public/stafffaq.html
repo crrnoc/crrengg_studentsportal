@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Staff FAQ</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f9f9f9;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .main-container {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 270px;
+    background-color: rgb(247, 201, 155);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+  }
+
+  .sidebar h2 {
+    margin: 40px 20px 20px 20px;
+    color: black;
+    font-size: 18px;
+  }
+
+  .menu {
+    list-style: none;
+    padding: 0;
+  }
+
+  .menu li {
+    margin-bottom: 15px;
+  }
+
+  .menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: black;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .menu li a:hover,
+  .menu li.active a {
+    background-color: #d4d4d4;
+    font-weight: bold;
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .menu li a span {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .menu li a:hover span {
+    transform: scale(1.2);
+  }
+
+  .logout {
+    background-color: #f09000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 50%;
+    margin: 20px auto;
+    transition: background 0.3s ease;
+  }
+
+  .logout:hover {
+    background-color: #d07900;
+  }
+
+  .content {
+    flex-grow: 1;
+    background-color: white;
+    padding: 40px;
+    margin-left: 270px;
+    transition: margin-left 0.3s ease;
+    overflow-y: auto;
+    width: 100%;
+  }
+
+  .faq-container {
+    max-width: 800px;
+    margin: auto;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.95));
+    padding: 30px 35px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2), 0 6px 10px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .faq-container:hover {
+    transform: scale(1.01);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.25);
+  }
+
+  .back-btn {
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    color: #0077B6;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+  }
+
+  .back-btn:hover {
+    transform: translateX(-3px);
+  }
+
+  h2 {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px;
+  }
+
+  .faq-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 12px;
+    text-align: left;
+  }
+
+  .question {
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1d1d1d;
+    transition: color 0.3s ease, background 0.3s ease;
+    padding: 10px;
+    border-radius: 6px;
+  }
+
+  .question:hover {
+    color: #0077B6;
+    background-color: rgba(0, 119, 182, 0.1);
+  }
+
+  .answer {
+    display: none;
+    padding-left: 15px;
+    padding-right: 5px;
+    color: #333;
+    font-size: 16px;
+    margin-top: 8px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .rotate {
+    transform: rotate(180deg);
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f75cb;
+    color: white;
+    font-size: 24px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    z-index: 9999;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .main-container {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      width: 100%;
+      height: 90vh;
+      position: fixed;
+      top: -100%;
+      left: 0;
+      overflow-y: auto;
+      transition: top 0.3s ease-in-out;
+    }
+
+    .sidebar.open {
+      top: 0;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .mobile-toggle {
+      display: block;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <div class="main-container">
+    <div class="sidebar">
+      <h2><strong>ID:</strong> <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="knowaboutstd1.html"><span>👤</span> Know about Student</a></li>
+        <li><a href="editstudentdetails.html"><span>✏️</span> Edit Student Details</a></li>
+        <li><a href="sendnotification.html"><span>📨</span> Send Notification</a></li>
+        <li><a href="updatefee.html"><span>💵</span> Update Fee</a></li>
+        <li><a href="imposefines.html"><span>💰</span> Impose Fines</a></li>
+        <li><a href="addstudent.html"><span>➕</span> Add Student</a></li>
+        <li><a href="backlogs.html"><span>📚</span> Find Backlogs</a></li>
+        <li><a href="mycounselling.html"><span>📋</span> View Counselling</a></li>
+        <li class="active"><a href="staffsettings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="content">
+      <div class="faq-container">
+                <button class="back-btn" onclick="window.location.href='staffsettings.html'">🔙<span>Back to Settings</span></button>
+        <h2>Staff - Frequently Asked Questions</h2>
+        <div id="faq-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+
+<script>
+  const questions = [
+    "How do I log in as staff?",
+    "What is my staff User ID?",
+    "What if I forget my password?",
+    "Can I update student fee payment details?",
+    "Can I generate a NOC for a student?",
+    "How do I check student academic and personal info?",
+    "How can I ensure a student is eligible for NOC?",
+    "What if the NOC generation button is disabled?",
+    "Can staff access all student records?",
+    "How do I logout of the portal?"
+  ];
+
+  const answers = [
+    "Go to the portal login page, enter your assigned User ID, password, and select 'staff' role to log in.",
+    "It is the ID provided by the admin when your account was created.",
+    "Please contact the admin or developer team to reset your password.",
+    "Yes, go to 'Update fee details' section, select the student, and update the payment data.",
+    "Yes, staff can generate NOC for eligible students through the 'Generate NOC' tab.",
+    "Use the 'Know about Student' menu to view complete student information.",
+    "Ensure the student is in the final year and has cleared all fee dues. Only then NOC is available.",
+    "It means the student doesn't meet all the requirements for NOC generation.",
+    "Yes, staff have access to view student profiles, fee, and academic info.",
+    "Click on the Logout button in the sidebar to safely exit the portal."
+  ];
+
+  const faqList = document.getElementById("faq-list");
+
+  questions.forEach((q, index) => {
+    const item = document.createElement("div");
+    item.classList.add("faq-item");
+    item.innerHTML = `
+      <div class="question">${q} <span class="arrow">▼</span></div>
+      <div class="answer">${answers[index]}</div>
+    `;
+    faqList.appendChild(item);
+
+    item.querySelector(".question").addEventListener("click", () => {
+      const visible = item.querySelector(".answer").style.display === "block";
+      document.querySelectorAll(".answer").forEach(a => a.style.display = "none");
+      document.querySelectorAll(".arrow").forEach(a => a.classList.remove("rotate"));
+      if (!visible) {
+        item.querySelector(".answer").style.display = "block";
+        item.querySelector(".arrow").classList.add("rotate");
+      }
+    });
+  });
+
+  const userId = localStorage.getItem("userId");
+  document.getElementById("userId").textContent = userId || "Unknown";
+
+  function toggleMobileMenu() {
+    document.querySelector('.sidebar').classList.toggle('open');
+  }
+
+  document.querySelectorAll(".menu li a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  function logout() {
+    localStorage.removeItem("userId");
+    if ("caches" in window) {
+      caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+    }
+    window.location.replace("index.html");
+  }
+</script>
+
+</body>
+</html>

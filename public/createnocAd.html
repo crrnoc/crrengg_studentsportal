@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manual NOC Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #3cb6ff;
+      --accent-color: #ff3d3d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: var(--main-color);
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 60px 20px;
+    }
+
+    .noc-card {
+      background: white;
+      max-width: 700px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: var(--main-color);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #f9f9f9;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .fee-section {
+      margin-top: 20px;
+    }
+
+    .fee-type-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .fee-type-row select,
+    .fee-type-row input {
+      flex: 1;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--main-color), var(--accent-color));
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(60, 182, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 18px rgba(255, 61, 61, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        left: -250px;
+        transition: 0.4s ease;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 80px 20px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Accounts Panel</h2>
+    <ul>
+      <li onclick="navigateTo('upload-sbi.html')">🏦 Upload SBI References</li>
+      <li onclick="navigateTo('noc-status.html')">📄 NOC Status</li>
+      <li onclick="navigateTo('createnocAd.html')">🧾 Create NOC</li>
+      <li onclick="navigateTo('studentsfeesearch.html')">🔍 Student Fee Search</li>
+    </ul>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="noc-card">
+      <h2>📝 Manual NOC Generation</h2>
+      <form id="manualNocForm">
+        <div class="form-group">
+          <label for="regno">Registration Number</label>
+          <input type="text" id="regno" name="regno" required />
+        </div>
+
+        <div class="form-group">
+          <label for="year">Academic Year</label>
+          <select id="year" name="year" required>
+            <option value="">-- Select Year --</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
+        </div>
+
+        <div class="fee-section">
+          <label>Fee Details (Paid/Unpaid & Amount)</label>
+
+          <div class="fee-type-row">
+            <select name="tuitionStatus"><option value="Paid">Tuition Fee - Paid</option><option value="Not Paid">Tuition Fee - Not Paid</option></select>
+            <input type="number" name="tuitionAmount" placeholder="Amount ₹" />
+          </div>
+
+          <div class="fee-type-row">
+            <select name="hostelStatus"><option value="Paid">Hostel Fee - Paid</option><option value="Not Paid">Hostel Fee - Not Paid</option></select>
+            <input type="number" name="hostelAmount" placeholder="Amount ₹" />
+          </div>
+
+          <div class="fee-type-row">
+            <select name="busStatus"><option value="Paid">Bus Fee - Paid</option><option value="Not Paid">Bus Fee - Not Paid</option></select>
+            <input type="number" name="busAmount" placeholder="Amount ₹" />
+          </div>
+
+          <div class="fee-type-row">
+            <select name="universityStatus"><option value="Paid">University Fee - Paid</option><option value="Not Paid">University Fee - Not Paid</option></select>
+            <input type="number" name="universityAmount" placeholder="Amount ₹" />
+          </div>
+
+          <div class="fee-type-row">
+            <select name="examStatus"><option value="Paid">Exam Fee - Paid</option><option value="Not Paid">Exam Fee - Not Paid</option></select>
+            <input type="number" name="examAmount" placeholder="Amount ₹" />
+          </div>
+
+          <div class="fee-type-row">
+            <select name="libraryStatus"><option value="Paid">Library Fee - Paid</option><option value="Not Paid">Library Fee - Not Paid</option></select>
+            <input type="number" name="libraryAmount" placeholder="Amount ₹" />
+          </div>
+
+          <div class="fee-type-row">
+            <select name="fineStatus"><option value="Paid">Fine - Paid</option><option value="Not Paid">Fine - Not Paid</option></select>
+            <input type="number" name="fineAmount" placeholder="Amount ₹" />
+          </div>
+        </div>
+
+        <button type="submit">Generate NOC PDF</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+function navigateTo(route) {
+  const routes = {
+    'uploadresultsAd.html': '/uploadresults',
+    'uploadattendanceAd.html': '/uploadattendance',
+    'upload-sbi.html': '/uploadsbi',
+    'upload-midmarks.html': '/uploadmidmarks',
+    'du-match-status.html': '/du-match-status',
+    'noc-status.html': '/nocstatus',
+    'removestudents.html': '/removestudents',
+    'createnocAd.html': '/createnoc',
+    'uploadstudents.html':'/uploadstudents',
+    'studentsfeesearch.html':'/studentsfeesearch'
+  };
+  window.location.href = routes[route] || '/adminpanel';
+}
+
+function logout() {
+  fetch("/logout").then(() => {
+    localStorage.removeItem("userId");
+    window.location.replace("index.html");
+  });
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+
+window.history.pushState(null, "", window.location.href);
+window.onpopstate = () => window.history.pushState(null, "", window.location.href);
+
+document.getElementById("manualNocForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const regno = document.getElementById("regno").value.trim();
+  const year = document.getElementById("year").value;
+  const feeStatus = {
+    tuition: { status: e.target.tuitionStatus.value || "Not Specified", amount: e.target.tuitionAmount.value || "-" },
+    hostel: { status: e.target.hostelStatus.value || "Not Specified", amount: e.target.hostelAmount.value || "-" },
+    bus: { status: e.target.busStatus.value || "Not Specified", amount: e.target.busAmount.value || "-" },
+    university: { status: e.target.universityStatus.value || "Not Specified", amount: e.target.universityAmount.value || "-" },
+    semester: { status: e.target.examStatus.value || "Not Specified", amount: e.target.examAmount.value || "-" },
+    library: { status: e.target.libraryStatus.value || "Not Specified", amount: e.target.libraryAmount.value || "-" },
+    fines: { status: e.target.fineStatus.value || "Not Specified", amount: e.target.fineAmount.value || "-" }
+  };
+
+  try {
+    const response = await fetch("/admin/manual-create-noc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ regno, year, feeStatus })
+    });
+
+    if (!response.ok) {
+      Swal.fire({ icon: 'error', title: 'Failed', text: 'NOC generation failed. Please try again.' });
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `NOC_${regno}_Year${year}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    Swal.fire({ icon: 'success', title: 'Downloaded', text: 'NOC PDF has been downloaded successfully!' });
+
+  } catch (err) {
+    console.error("Error during NOC generation:", err);
+    Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred while generating the NOC.' });
+  }
+});
+</script>
+</body>
+</html>
+

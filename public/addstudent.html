@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Student</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #1d1d1d;
+      color: #000;
+    }
+
+    .main-container {
+      display: flex;
+      height: 100vh;
+      flex-direction: row;
+    }
+
+    .sidebar {
+      width: 270px;
+      background-color: rgb(247, 201, 155);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      margin: 40px 20px 20px 20px;
+      color: black;
+      font-size: 18px;
+    }
+
+    .menu {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .menu li {
+      margin-bottom: 15px;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .menu li a:hover,
+    .menu li.active a {
+      background-color: #d4d4d4;
+      font-weight: bold;
+      transform: translateX(5px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu li a span {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu li a:hover span {
+      transform: scale(1.2);
+    }
+
+    .logout {
+      background-color: #f09000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 50%;
+      margin: 20px auto;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover {
+      background-color: #d07900;
+    }
+.main {
+  flex-grow: 1;
+  background-color: white;
+  padding: 40px;
+  overflow-y: auto; /* allow full scroll */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-left: 270px;
+}
+
+.form-box {
+  background: linear-gradient(135deg, rgba(54, 169, 225, 0.85), rgba(30, 130, 190, 0.85));
+  padding: 35px 30px;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  color: white;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.22);
+  /* REMOVE height & overflow */
+}
+
+    .form-box h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-box label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+
+    .form-box input,
+    .form-box select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      color: #000;
+    }
+
+    .form-box button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1D73D2;
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .form-box button:hover {
+      background-color: #155ea8;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .tab-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  gap: 15px;
+}
+
+.tab-button {
+  background: linear-gradient(145deg,  #1D73D2, #2596be);
+  border: 2px solid #888;
+  border-radius: 30px;
+  padding: 10px 25px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+}
+
+.tab-button:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: linear-gradient(to right, #1D73D2, #2596be);
+  color: white;
+  border-color: #1D73D2;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+    input[type="file"] {
+  background-color: white;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1f75cb;
+      color: white;
+      font-size: 24px;
+      padding: 12px 18px;
+      border-radius: 50px;
+      z-index: 2000;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: 90vh;
+        top: -100%;
+        left: 0;
+        position: fixed;
+        overflow-y: auto;
+        transition: top 0.3s ease-in-out;
+      }
+
+      .sidebar.open {
+        top: 0;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .form-box {
+        padding: 25px;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2><strong>ID:</strong> <span id="userId">Admin</span></h2>
+      <ul class="menu">
+        <li><a href="knowaboutstd1.html"><span>👤</span> Know about Student</a></li>
+        <li><a href="editstudentdetails.html"><span>✏️</span> Edit Student Details</a></li>
+        <li><a href="sendnotification.html"><span>📨</span> Send Notification</a></li>
+        <li><a href="updatefee.html"><span>💵</span> Update Fee</a></li>
+        <li><a href="imposefines.html"><span>💰</span> Impose Fines</a></li>
+        <li class="active"><a href="#"><span>➕</span> Add Student</a></li>
+        <li><a href="mark_attendance.html"><span>📝</span> Mark Attendance</a></li>
+        <li><a href="backlogs.html"><span>📚</span> Find Backlogs</a></li>
+        <li><a href="mycounselling.html"><span>📋</span> View Counselling</a></li>
+        <li><a href="staffsettings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content Area -->
+<div class="main">
+  <div class="form-box">
+    <h2>Add New Student</h2>
+
+<!-- 🎯 Single Student Form -->
+<form id="singleForm" class="student-form">
+  <label>User ID</label>
+  <input type="text" name="userId" minlength="10" maxlength="10"
+         oninput="this.value = this.value.toUpperCase()" required />
+
+  <label>Full Name</label>
+  <input type="text" name="name" required oninput="liveTitleCase(this)" />
+
+  <label>DOB</label>
+  <input type="date" name="dob" required id="dobField" />
+
+  <label>Registration No</label>
+  <input type="text" name="reg_no" minlength="10" maxlength="10"
+         oninput="this.value = this.value.toUpperCase()" required />
+
+  <label>Unique ID</label>
+  <input type="text" name="unique_id" maxlength="16" required />
+
+  <label>Year</label>
+  <select name="year" required>
+    <option value="">Select</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
+
+  <label>Course</label>
+  <select name="course" required>
+    <option value="">Select</option>
+    <option value="B.Tech-CSE">B.Tech-CSE</option>
+    <option value="B.Tech-AI&ML">B.Tech-AI&ML</option>
+    <option value="B.Tech-AI&DS">B.Tech-AI&DS</option>
+    <option value="B.Tech-Cyber Security">B.Tech-Cyber Security</option>
+    <option value="B.Tech-ECE">B.Tech-ECE</option>
+    <option value="B.Tech-EEE">B.Tech-EEE</option>
+    <option value="B.Tech-Civil">B.Tech-Civil</option>
+    <option value="B.Tech-Mech">B.Tech-Mech</option>
+  </select>
+
+  <label>Semester</label>
+  <select name="semester" required>
+    <option value="">Select</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+  </select>
+
+  <label>Section</label>
+  <input type="text" name="section" maxlength="1"
+         oninput="this.value = this.value.toUpperCase()" required />
+
+  <label>Aadhar No</label>
+  <input type="text" name="aadhar_no" maxlength="12" pattern="\d{12}" />
+
+  <label>Mobile No</label>
+  <input type="text" name="mobile_no" maxlength="10" pattern="\d{10}" required />
+
+  <label>Father Name</label>
+  <input type="text" name="father_name" required oninput="liveTitleCase(this)" />
+
+  <label>Father Mobile</label>
+  <input type="text" name="father_mobile_no" maxlength="10" pattern="\d{10}" required />
+
+  <label>Counsellor Name</label>
+  <input type="text" name="counsellor_name" required oninput="liveTitleCase(this)" />
+
+  <label>Counsellor Mobile</label>
+  <input type="text" name="counsellor_mobile" maxlength="10" pattern="\d{10}" required />
+
+  <label>Email</label>
+  <input type="email" name="email" required />
+
+  <label>Admission Type</label>
+  <select name="admission_type" required>
+    <option value="">Select</option>
+    <option value="Counselling">Convener</option>
+    <option value="Management">Management</option>
+    <option value="Spot">Spot</option>
+     <option value="LATERAL">Lateral</option>
+  </select>
+
+  <label>Password</label>
+  <input type="password" name="password" required />
+
+  <button type="submit">Add Student</button>
+</form>
+
+    <p id="response" class="message"></p>
+  </div>
+</div>
+
+  </div> <!-- .main-container -->
+
+  <!-- 📱 Mobile Sidebar Toggle -->
+  <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+/* ---------- 🔐 Unauthorized Login Check ---------- */
+const userId = localStorage.getItem("userId");
+if (!userId) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'Login Required',
+    text: 'Please login to access this page.'
+  }).then(() => {
+    window.location.href = "index.html";
+  });
+} else {
+  document.getElementById("userId").textContent = userId || "Admin";
+
+  /* ---------- shared helpers ---------- */
+  function showSingle() {
+    document.getElementById("singleForm").style.display = "block";
+    document.getElementById("tabSingle").classList.add("active");
+  }
+
+  function toggleMobileMenu() {
+    document.querySelector(".sidebar").classList.toggle("open");
+  }
+
+  function logout() {
+    localStorage.removeItem("userId");
+    location.href = "index.html";
+  }
+
+  /* 🎯 Capitalize as user types */
+  function liveTitleCase(input) {
+    input.value = input.value.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  /* 🎯 Set dynamic max DOB for 16+ age */
+  window.addEventListener("DOMContentLoaded", () => {
+    const dobField = document.querySelector("input[name='dob']");
+    const today = new Date();
+    const maxDOB = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+    dobField.max = maxDOB.toISOString().split("T")[0];
+    dobField.min = "1990-01-01";
+  });
+
+  /* ✅ Single student submit */
+  document.getElementById("singleForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    // Capitalize relevant fields before send
+    data.name = toTitleCase(data.name.trim());
+    data.father_name = toTitleCase(data.father_name.trim());
+    data.counsellor_name = toTitleCase(data.counsellor_name.trim());
+    data.section = data.section.trim().toUpperCase();
+
+    // DOB validation (age ≥ 16)
+    const dob = new Date(data.dob);
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear() - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+    if (age < 16) {
+      Swal.fire("Invalid DOB", "Student must be at least 16 years old.", "error");
+      return;
+    }
+
+    // Mobile and Aadhar validation
+    if (!/^\d{10}$/.test(data.mobile_no)) {
+      Swal.fire("Invalid Mobile", "Enter a valid 10-digit mobile number.", "error");
+      return;
+    }
+    if (data.aadhar_no && !/^\d{12}$/.test(data.aadhar_no)) {
+      Swal.fire("Invalid Aadhar", "Enter a valid 12-digit Aadhar number.", "error");
+      return;
+    }
+
+    const res = await fetch("/add-student", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    }).catch(() => null);
+
+    const out = await (res?.json() ?? { success: false, message: "Server error" });
+    Swal.fire(out.success ? "✅ Added" : "❌ Failed", out.message, out.success ? "success" : "error");
+    if (out.success) form.reset();
+  });
+
+  /* 🔠 Attach auto-capitalization to fields */
+  document.addEventListener("DOMContentLoaded", () => {
+    ["name", "father_name", "counsellor_name"].forEach(field => {
+      const input = document.querySelector(`input[name="${field}"]`);
+      if (input) {
+        input.addEventListener("input", () => liveTitleCase(input));
+      }
+    });
+  });
+
+  /* Title Case helper used in backend and submit */
+  function toTitleCase(str) {
+    return str.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+  }
+}
+</script>
+</body>
+</html>
+
+

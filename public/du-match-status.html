@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DU Match Status</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #3cb6ff;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 60px 20px;
+    }
+
+    .banner {
+      background: linear-gradient(135deg, #5bc0de, #3c96c8);
+      padding: 20px;
+      border-radius: 12px;
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      font-size: 18px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 700px;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+    }
+
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 100%;
+      max-width: 300px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: linear-gradient(to right, #3cb6ff, #ff3d3d);
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(60, 182, 255, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { left: -250px; transition: 0.4s ease; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .main { margin-left: 0; padding: 80px 20px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li onclick="navigateTo('/uploadattendance')">🗓️ Upload Attendance</li>
+      <li onclick="navigateTo('/uploadmidmarks')">📈 Upload Mid Marks</li>
+      <li onclick="navigateTo('/addmycounselling')">👥 Assign Counselling</li>
+      <li onclick="navigateTo('/dumatch')">🔍 DU Match Status</li>
+      <li onclick="navigateTo('/removestudents')">🗑️ Delete Students</li>
+      <li onclick="navigateTo('/uploadstudents')">📚 Upload Student Data</li>
+      <li onclick="navigateTo('/staffallocation')">🧑‍🏫 Staff Period Allocation</li>
+      <li onclick="navigateTo('/downloadattendance')">📥 Download Attendance</li>
+      <li onclick="navigateTo('/editattendance')">✏️ Edit Attendance</li>
+      <li onclick="navigateTo('/sendsms')">📤 Send SMS</li>
+    </ul>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="banner">📊 DU Match Status</div>
+    <div class="card">
+      <input type="text" id="searchInput" placeholder="Search by Reg No or Name" oninput="searchDU()"/>
+      <button onclick="loadMatches()">Reset</button>
+
+      <table id="matchTable">
+       <thead>
+  <tr>
+    <th>User ID</th>
+    <th>Student Name</th>
+    <th>Academic Year</th> <!-- ✅ -->
+    <th>Fee Type</th>
+    <th>Amount Paid</th>
+    <th>DU Number</th>
+    <th>Status</th>
+    <th>Matched On</th>
+  </tr>
+</thead>
+
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+ <script>
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first.");
+    window.location.href = "index.html";
+  }
+
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+
+  function logout() {
+    fetch("/logout")
+      .then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      })
+      .catch(() => {
+        Swal.fire("Logout Failed", "Please try again", "error");
+      });
+  }
+
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+  }
+
+  function loadMatches() {
+    fetch("/admin/matches")
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector("#matchTable tbody");
+      tbody.innerHTML = data.map(row => `
+  <tr>
+    <td>${row.userId}</td>
+    <td>${row.name || '-'}</td>
+    <td>${row.academic_year || '-'}</td> <!-- ✅ Display academic year -->
+    <td>${row.fee_type || '-'}</td>
+    <td>₹${row.amount_paid || '-'}</td>
+    <td>${row.sbi_ref_no || '-'}</td>
+    <td>${row.matched ? '✅' : '❌'}</td>
+    <td>${row.matched_on || '-'}</td>
+  </tr>
+`).join("");
+
+      });
+  }
+
+  function searchDU() {
+  const query = document.getElementById("searchInput").value.trim();
+  if (!query) return loadMatches();
+
+  fetch("/admin/search-student-sbi", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.querySelector("#matchTable tbody");
+    if (data.success && data.data.length) {
+      tbody.innerHTML = data.data.map(row => `
+        <tr>
+          <td>${row.userId}</td>
+          <td>${row.studentName || '-'}</td>
+          <td>${row.academic_year || '-'}</td>
+          <td>${row.fee_type || '-'}</td>
+          <td>₹${row.amount_paid || '-'}</td>
+          <td>${row.sbi_ref_no || '-'}</td>
+          <td>${row.fee_matched ? '✅' : '❌'}</td>
+          <td>${row.fee_matched_on || '-'}</td>
+        </tr>
+      `).join("");
+    } else {
+      tbody.innerHTML = `<tr><td colspan="8">No matching records found.</td></tr>`;
+    }
+  })
+  .catch(() => {
+    Swal.fire("Error", "Search failed. Please try again.", "error");
+  });
+}
+
+  // Prevent back nav after logout
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) window.location.reload();
+  });
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = () => window.history.pushState(null, "", window.location.href);
+
+  // Initial load
+  loadMatches();
+</script>
+
+</body>
+</html>
+
+
+

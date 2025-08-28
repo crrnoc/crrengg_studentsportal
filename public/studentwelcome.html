@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Welcome</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #2e2e2e;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 270px;
+  background-color: rgb(247, 201, 155);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
+  z-index: 999;
+}
+
+.sidebar-photo {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  border: 3px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar h2 {
+  margin: 40px 20px 20px 20px;
+  color: black;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.menu {
+  list-style: none;
+}
+
+.menu li {
+  margin-bottom: 15px;
+}
+
+.menu li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: black;
+  padding: 12px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.menu li a:hover,
+.menu li.active a {
+  background-color: #d4d4d4;
+  font-weight: bold;
+  transform: translateX(5px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logout {
+  background-color: #f09000;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 50%;
+  margin: 20px auto 0;
+  transition: background 0.3s ease;
+}
+
+.logout:hover {
+  background-color: #d07900;
+}
+
+.main-section {
+  flex-grow: 1;
+  background-color: #ffffff;
+  padding: 40px 20px;
+  margin-left: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+/* Updated Welcome Card Size */
+.welcome-card {
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.9), rgba(255, 110, 0, 0.9));
+  color: white;
+  padding: 30px 20px;
+  border-radius: 20px;
+  text-align: center;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-card h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.welcome-card p {
+  font-size: 16px;
+}
+
+/* Notifications */
+.notifications {
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+  color: #d35400;
+  padding: 10px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.slideshow-container {
+  width: 100%;
+  max-width: 1000px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.slide {
+  display: none;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+  display: block;
+  opacity: 1;
+}
+
+.college-info {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  line-height: 1.8;
+  color: #333;
+  max-width: 1000px;
+}
+
+.college-info h2 {
+  color: #ff6600;
+  margin-bottom: 20px;
+}
+
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1f75cb;
+  color: white;
+  font-size: 24px;
+  padding: 12px 18px;
+  border-radius: 50px;
+  z-index: 9999;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    top: -100%;
+    left: 0;
+    width: 100%;
+    max-height: 90vh;
+  }
+
+  .sidebar.open {
+    top: 0;
+  }
+
+  .mobile-toggle {
+    display: block;
+  }
+
+  .main-section {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .welcome-card {
+    width: 100%;
+    padding: 25px 15px;
+  }
+
+  .slideshow-container {
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <img id="sidebarPhoto" class="sidebar-photo" style="display: none;" />
+      <h2>ID: <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="studentdetails.html">📄 Student details</a></li>
+        <li><a href="feedetails.html">🎓 Fee details</a></li>
+        <li><a href="updaterefno.html">🔄 Update fee payment</a></li>
+        <li><a href="attendence.html">📅 View Attendance</a></li>
+        <li><a href="studentresults.html">📊 Student Results</a></li>
+        <li><a href="generatenoc.html">➕ Generate NOC</a></li>
+        <li><a href="settings.html">⚙️ Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="main-section">
+      <div class="welcome-card">
+        <h1>Welcome, <span id="welcomeName">Student</span>!</h1>
+        <p>We're glad to have you back at CRR Engineering College.<br>
+          Use the sidebar to navigate through your academic dashboard.</p>
+      </div>
+
+      <!-- Notifications -->
+<div class="notifications" id="dynamicNotifications">
+  <marquee behavior="scroll" direction="left" scrollamount="5">
+    Loading notifications...
+  </marquee>
+</div>
+
+
+      <!-- Slideshow -->
+      <div class="slideshow-container">
+        <img class="slide active" src="img1.jpg" alt="College Image 1">
+        <img class="slide" src="img2.jpg" alt="College Image 2">
+        <img class="slide" src="img3.jpg" alt="College Image 3">
+        <img class="slide" src="img4.jpg" alt="College Image 4">
+      </div>
+
+      <!-- College Info -->
+      <div class="college-info">
+        <h2>Welcome to Sir C. R. Reddy College of Engineering (AUTONOMOUS)</h2>
+        <p>
+          Sir C.R. Reddy College of Engineering(A) is the first Engineering College in Andhra Pradesh sanctioned and recognized by All India Council for Technical Education (AICTE). This College is permanently affiliated to JNTUK from the Academic Year 2017-18.
+          <br><br>
+          Since its inception in 1989, Sir C.R. Reddy College of Engineering(A) has been a premier institute for quality engineering education in Andhra Pradesh under the stewardship of its broad-minded and magnanimous management. The last two and a half decades have seen the Institute fulfilling its motto of <strong>'QUALITY SERVICE & VALUE BASED EDUCATION'</strong> to the student community.
+          <br><br>
+          Adhering to its core values, the institute gives top priority to ethical values, high standards, and a commitment to value-based education. We believe in working honestly and sincerely, in building trust, and in maintaining a long-lasting relationship with society.
+          <br><br>
+          The College is situated near Vatluru railway gate in Eluru, the Head Quarters of West Godavari district. It is surrounded by beautiful paddy fields and is on the Chennai-Howrah highway and train route. A large number of buses and trains run via this town. It is easily accessible from any part of the country by rail as well as road.
+          <br><br>
+          The College is located in its own sprawling campus with an area of 30.48 acres. Its magnanimous infrastructure and greenery attract the attention of people who pass by. The vast green campus housing several Departments provides a stimulating environment to the high-caliber staff and students of the institution.
+          <br><br>
+          The Campus at Vatluru is a place where students from all walks of life are under a single umbrella pursuing their BE/B.Tech, M.Tech, and MBA courses.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+
+<!-- Add this updated <script> section inside your <script> tag -->
+<script>
+  // Toggle mobile sidebar
+  function toggleMobileMenu() {
+    document.querySelector('.sidebar').classList.toggle('open');
+  }
+
+  // Logout and clear session
+  function logout() {
+    localStorage.removeItem("userId");
+    if ("caches" in window) {
+      caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    }
+    window.location.replace("index.html");
+  }
+
+  // Slideshow
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.remove('active');
+    });
+    slides[index].classList.add('active');
+  }
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    showSlide(currentSlide);
+  }
+
+  setInterval(nextSlide, 5000); // auto-slide every 5s
+
+  // Load notifications dynamically
+  function loadNotifications(userId) {
+    fetch(`/student/notifications/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        const notifyBox = document.getElementById("dynamicNotifications");
+        if (!data || data.length === 0) {
+          notifyBox.innerHTML = `<p>No notifications found for your department.</p>`;
+          return;
+        }
+
+        const message = data.map(n => `🔔 ${n.message}`).join(" | ");
+        notifyBox.innerHTML = `
+          <marquee behavior="scroll" direction="left" scrollamount="5">
+            ${message}
+          </marquee>
+        `;
+      })
+      .catch(err => {
+        console.error("Notification load error:", err);
+        document.getElementById("dynamicNotifications").innerHTML = "<p>Error loading notifications.</p>";
+      });
+  }
+
+  // Load student details after page loads
+  document.addEventListener("DOMContentLoaded", () => {
+    const userId = localStorage.getItem('userId');
+
+    if (!userId) {
+      alert("Please login first.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    document.getElementById("userId").textContent = userId;
+    showSlide(currentSlide); // Show first slide
+
+    // Fetch and display student name & photo
+    fetch(`/student/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.name) {
+          document.getElementById("welcomeName").textContent = data.name;
+        }
+        if (data.photo_url) {
+          const photo = document.getElementById("sidebarPhoto");
+          photo.src = data.photo_url;
+          photo.style.display = "block";
+        }
+      })
+      .catch(err => {
+        console.error("Error loading student data:", err);
+      });
+
+    // Call dynamic notifications function
+    loadNotifications(userId);
+  });
+
+  // Prevent going back after logout
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = () => window.history.pushState(null, "", window.location.href);
+</script>
+
+</body>
+</html>

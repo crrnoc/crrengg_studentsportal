@@ -1,0 +1,347 @@
+<!-- ⬇️ HEAD SECTION: uses admin colors and fonts -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🗑️ Remove Students</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --main-color: #3cb6ff;
+      --accent-color: #ff3d3d;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+    }
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+    .sidebar h2 {
+      text-align: center;
+      font-size: 20px;
+      color: var(--main-color);
+      margin-bottom: 30px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .sidebar li {
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .sidebar li:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+    }
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 60px 20px;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    h3 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+    .student-info {
+      background: #f2f9ff;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #222;
+    }
+    button {
+      background: linear-gradient(135deg, var(--main-color), var(--accent-color));
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(60, 182, 255, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { left: -250px; transition: 0.4s ease; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .main { margin-left: 0; padding: 80px 20px 20px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li onclick="navigateTo('/uploadattendance')">🗓️ Upload Attendance</li>
+      <li onclick="navigateTo('/uploadmidmarks')">📈 Upload Mid Marks</li>
+      <li onclick="navigateTo('/addmycounselling')">👥 Assign Counselling</li>
+      <li onclick="navigateTo('/dumatch')">🔍 DU Match Status</li>
+      <li onclick="navigateTo('/removestudents')">🗑️ Delete Students</li>
+      <li onclick="navigateTo('/uploadstudents')">📚 Upload Student Data</li>
+      <li onclick="navigateTo('/staffallocation')">🧑‍🏫 Staff Period Allocation</li>
+      <li onclick="navigateTo('/downloadattendance')">📥 Download Attendance</li>
+      <li onclick="navigateTo('/editattendance')">✏️ Edit Attendance</li>
+      <li onclick="navigateTo('/sendsms')">📤 Send SMS</li>
+    </ul>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <h3>🧍 Delete a Specific Student</h3>
+      <label for="regNo">Enter Registration Number</label>
+      <input type="text" id="regNo" placeholder="e.g., 23B81A1234" />
+      <div id="studentInfo" class="student-info" style="display:none;"></div>
+      <button onclick="fetchStudentDetails()">Get Student</button>
+      <button onclick="confirmDelete()" style="background: linear-gradient(to right, #e74c3c, #c0392b);">Delete Student</button>
+    </div>
+
+    <div class="card">
+      <h3>📦 Delete Batch of Students</h3>
+      <label for="batchPrefix">Enter Batch Prefix</label>
+      <input type="text" id="batchPrefix" placeholder="e.g., 23B8" />
+      <label for="batchBranch">Select Branch</label>
+      <select id="batchBranch">
+        <option value="">-- Select Branch --</option>
+        <option>CIVIL</option><option>MECH</option><option>EEE</option><option>ECE</option>
+        <option>CSE</option><option>CSD</option><option>CSM</option><option>CSC</option><option>IT</option>
+      </select>
+      <button onclick="filterBatch()">View Batch Students</button>
+      <div id="batchList" class="student-info" style="display:none;"></div>
+      <button onclick="confirmBatchDelete()" style="background: linear-gradient(to right, #c0392b, #8e44ad);">Delete Batch</button>
+    </div>
+  </div>
+
+<script>
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first.");
+    window.location.href = "index.html";
+  }
+
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+
+  function logout() {
+    fetch("/logout")
+      .then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      })
+      .catch(() => Swal.fire("Logout Failed", "Please try again", "error"));
+  }
+
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+  }
+
+  // 👇 Single Student Deletion
+  let fetchedReg = "";
+
+  function fetchStudentDetails() {
+    const regNo = document.getElementById("regNo").value.trim();
+    if (!regNo) return Swal.fire("Error", "Please enter a registration number", "warning");
+
+    fetch("/get-student-details", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reg_no: regNo })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) return Swal.fire("Not Found", data.message, "error");
+      fetchedReg = data.student.reg_no;
+      const infoBox = document.getElementById("studentInfo");
+      infoBox.innerHTML = `
+        <strong>Name:</strong> ${data.student.name}<br>
+        <strong>Reg No:</strong> ${data.student.reg_no}<br>
+        <strong>Course:</strong> ${data.student.course}<br>
+        <strong>Section:</strong> ${data.student.section}
+      `;
+      infoBox.style.display = "block";
+    })
+    .catch(() => Swal.fire("Error", "Failed to fetch student data", "error"));
+  }
+
+  function confirmDelete() {
+    if (!fetchedReg) return Swal.fire("No Student", "Please fetch a student first.", "warning");
+
+    Swal.fire({
+      title: `Are you sure?`,
+      text: `Delete student ${fetchedReg}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("/delete-student", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reg_no: fetchedReg })
+        })
+        .then(res => res.json())
+        .then(data => {
+          fetch("/admin/delete-photos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prefix: fetchedReg })
+          }).then(() => {
+            Swal.fire("Deleted", data.message + " and photo removed!", "success");
+          });
+        })
+        .catch(() => Swal.fire("Error", "Failed to delete student", "error"));
+      }
+    });
+  }
+
+  // 👇 Batch Delete Functions
+  function filterBatch() {
+    const prefix = document.getElementById("batchPrefix").value.trim();
+    const branch = document.getElementById("batchBranch").value;
+
+    if (!prefix || !branch) return Swal.fire("Missing", "Please enter both prefix and branch", "warning");
+
+    fetch("/filter-batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ batchPrefix: prefix, branch })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("batchList");
+      if (!data.success || data.students.length === 0) {
+        list.innerHTML = "No students found.";
+        list.style.display = "block";
+        return;
+      }
+      list.innerHTML = data.students.map(s => `${s.reg_no} - ${s.name}`).join("<br>");
+      list.style.display = "block";
+    })
+    .catch(() => Swal.fire("Error", "Failed to fetch batch data", "error"));
+  }
+
+  function confirmBatchDelete() {
+    const prefix = document.getElementById("batchPrefix").value.trim();
+    const branch = document.getElementById("batchBranch").value;
+
+    if (!prefix || !branch) return Swal.fire("Missing Info", "Prefix and branch required", "warning");
+
+    Swal.fire({
+      title: "Delete Entire Batch?",
+      text: `This will delete all students starting with ${prefix} from ${branch}.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete batch"
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch("/delete-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ batchPrefix: prefix, branch })
+        })
+        .then(res => res.json())
+        .then(data => {
+          fetch("/admin/delete-photos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prefix })
+          }).then(() => {
+            Swal.fire("Deleted", data.message + " and photos removed!", "success");
+          });
+        })
+        .catch(() => Swal.fire("Error", "Failed to delete batch", "error"));
+      }
+    });
+  }
+
+  // 🔒 Prevent back button after logout
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) window.location.reload();
+  });
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = () => window.history.pushState(null, "", window.location.href);
+</script>
+
+</body>
+
+
+

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HOD Backlogs View</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .sidebar img {
+      height: 50px;
+      margin: 0 auto 15px auto;
+      display: block;
+    }
+
+    .sidebar h4 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar a:hover,
+    .sidebar .active {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+
+    .logout {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover { background-color: #CA6F1E; }
+
+    /* Overlay behind sidebar */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 90;
+      transition: all 0.3s ease;
+    }
+    .overlay.active { display: block; }
+
+    /* Mobile toggle */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    /* Main Content */
+    .content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 40px;
+      transition: filter 0.3s ease;
+      margin-top:36px;
+    }
+    .content.shifted { filter: blur(2px); pointer-events: none; }
+
+    h2 {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 30px;
+      color: #2C3E50;
+    }
+
+    .form-section {
+      background: linear-gradient(135deg, #5bc0de, #3c96c8);
+      padding: 30px;
+      border-radius: 20px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .form-section input,
+    .form-section button {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-size: 16px;
+      width: 80%;
+    }
+
+    .form-section input { border: 1px solid #ccc; }
+
+    .form-section button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s ease;
+    }
+
+    .form-section button:hover {
+      background-color: #0056b3;
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .count {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 30px;
+      color: #E74C3C;
+    }
+
+    .backlog-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 40px;
+      justify-content: center;
+    }
+
+    .backlog-card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      width: 280px;
+      transition: transform 0.3s ease;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .backlog-card:hover { transform: scale(1.03); }
+
+    .backlog-card h4 {
+      margin-bottom: 10px;
+      color: #E74C3C;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @media (max-width: 768px) {
+      .content { margin-left: 0; padding: 20px; }
+      .sidebar { left: -260px; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .backlog-card { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Mobile toggle -->
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰ Menu</div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <img src="crrengglogo.png" alt="College Logo"/>
+    <h4 id="welcomeText">Welcome HOD</h4>
+    <div class="menu">
+      <a href="hodpanel.html">🏠 Dashboard</a>
+      <a href="students.html">🎓 Students</a>
+      <a href="hodfeesearch.html">💰 Fee Search</a>
+      <a href="hodbacklogsview.html" class="active">📚 Backlogs</a>
+      <a href="hodmidmarks.html">📝 Mid Marks</a>
+      <a href="hodnotifications.html">📢 Send Notifications</a>
+    </div>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content" id="main-content">
+    <h2> Check Student Backlogs</h2>
+    <div class="form-section">
+      <h3>Enter Registration Number</h3>
+      <input type="text" id="regno" placeholder="Enter Registration Number" />
+      <button onclick="fetchTotalBacklogs()">Check Backlogs</button>
+    </div>
+
+    <div id="totalBacklogCount" class="count" style="display:none;"></div>
+    <div id="backlogCards" class="backlog-container" style="display:none;"></div>
+  </div>
+
+  <script>
+    const userId = localStorage.getItem("userId");
+    const welcomeText = document.getElementById("welcomeText");
+
+    if (!userId || !userId.startsWith("HOD")) {
+      alert("Please login as HOD");
+      window.location.href = "index.html";
+    } else {
+      const dept = userId.replace("HOD", "");
+      welcomeText.textContent = `Welcome Head of Department - ${dept}`;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const mainContent = document.getElementById("main-content");
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("active");
+      mainContent.classList.toggle("shifted");
+    }
+
+    function fetchTotalBacklogs() {
+      const regno = document.getElementById("regno").value.trim().toUpperCase();
+      if (!regno) {
+        Swal.fire("Missing RegNo", "Please enter registration number", "warning");
+        return;
+      }
+
+      fetch(`/total-backlogs?regno=${regno}`)
+        .then(res => res.json())
+        .then(data => {
+          const cardContainer = document.getElementById("backlogCards");
+          const countDiv = document.getElementById("totalBacklogCount");
+          cardContainer.innerHTML = "";
+
+          countDiv.style.display = "block";
+          countDiv.innerText = `Total Backlogs: ${data.count || 0}`;
+
+          if (!data.backlogData || data.backlogData.length === 0) {
+            cardContainer.style.display = "none";
+            return;
+          }
+
+          data.backlogData.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "backlog-card";
+            card.innerHTML = `
+              <h4>Semester: ${item.semester || "N/A"}</h4>
+              <p><strong>Subject Code:</strong> ${item.subcode}</p>
+              <p><strong>Subject Name:</strong> ${item.subname || "N/A"}</p>
+              <p><strong>Grade:</strong> ${item.grade}</p>
+            `;
+            cardContainer.appendChild(card);
+          });
+
+          cardContainer.style.display = "flex";
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Failed to fetch data", "error");
+        });
+    }
+  </script>
+</body>
+</html>

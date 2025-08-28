@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📤 Send SMS - Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #3cb6ff;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
+
+    .sidebar li.active {
+      background: rgba(255,255,255,0.3);
+      font-weight: bold;
+    }
+
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 40px;
+      margin-top: 36px;
+      transition: filter 0.3s ease;
+    }
+
+    .main.shifted {
+      filter: blur(2px);
+      pointer-events: none;
+    }
+
+    .banner {
+      background: linear-gradient(135deg, #5bc0de, #3c96c8);
+      padding: 20px;
+      border-radius: 20px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      margin: 0 auto 30px;
+      font-size: 18px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin-top: 5px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(to right, #3cb6ff, #ff3d3d);
+      border: none;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    #studentsList {
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      padding: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 6px;
+    }
+
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 5px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { left: -250px; transition: 0.4s ease; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .main { margin-left: 0; padding: 80px 20px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li onclick="navigateTo('/uploadattendance')">🗓️ Upload Attendance</li>
+      <li onclick="navigateTo('/uploadmidmarks')">📈 Upload Mid Marks</li>
+      <li onclick="navigateTo('/addmycounselling')">👥 Assign Counselling</li>
+      <li onclick="navigateTo('/dumatch')">🔍 DU Match Status</li>
+      <li onclick="navigateTo('/removestudents')">🗑️ Delete Students</li>
+      <li onclick="navigateTo('/uploadstudents')">📚 Upload Student Data</li>
+      <li onclick="navigateTo('/staffallocation')">🧑‍🏫 Staff Period Allocation</li>
+      <li onclick="navigateTo('/downloadattendance')">📥 Download Attendance</li>
+      <li onclick="navigateTo('/editattendance')">✏️ Edit Attendance</li>
+      <li onclick="navigateTo('/sendsms')">📤 Send SMS</li>
+    </ul>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div class="main" id="main-content">
+    <div class="banner">📤 Send SMS to Students</div>
+
+    <!-- FILTER SECTION -->
+    <section>
+      <label>Dept Code</label>
+      <input id="dept_code" placeholder="E.g. CSE">
+
+      <label>Year</label>
+      <input id="year" placeholder="E.g. 3">
+
+      <label>Course</label>
+      <select id="courseSelect"><option value="">Select...</option></select>
+
+      <label>Section</label>
+      <select id="sectionSelect"><option value="">Select...</option></select>
+
+      <p style="text-align:center; font-weight:bold;">OR</p>
+
+      <label>From Reg No</label>
+      <input id="reg_from">
+
+      <label>To Reg No</label>
+      <input id="reg_to">
+
+      <button id="fetchStudents">Fetch Students</button>
+      <button id="selectAll" style="background:green;">Select All</button>
+      <button id="clearAll" style="background:gray;">Clear All</button>
+
+      <div id="studentsList">No students loaded</div>
+    </section>
+
+    <hr style="margin: 20px 0;">
+
+    <!-- SMS SEND SECTION -->
+    <section>
+      <label>Sender ID</label>
+      <select id="senderId">
+        <option value="CRRSTU">CRRSTU</option>
+        <option value="CRRNOC">CRRNOC</option>
+      </select>
+
+      <label>Message Type</label>
+      <select id="templateType">
+        <option value="attendance">Attendance</option>
+        <option value="midmarks">Mid Marks</option>
+        <option value="university_eng">University Results (English)</option>
+        <option value="university_telugu">University Results (Telugu)</option>
+      </select>
+
+      <button id="sendBtn" style="margin-top:15px;">Send SMS</button>
+      <div id="progress" style="margin-top:10px; color:green;"></div>
+    </section>
+  </div>
+<script>
+  // 🔒 Session check
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    alert("Please login first.");
+    window.location.href = "index.html";
+  }
+
+  // 📌 Sidebar Navigation
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main-content");
+    sidebar.classList.toggle("open");
+    main.classList.toggle("shifted");
+  }
+
+  function logout() {
+    fetch("/logout")
+      .then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        alert("Logout failed. Try again.");
+      });
+  }
+
+  // 🔄 Prevent back navigation after logout
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = function () {
+    window.history.pushState(null, "", window.location.href);
+  };
+
+  // ===========================
+  // 📤 SEND SMS PAGE FUNCTIONS
+  // ===========================
+  let students = [];
+
+  // Fetch courses and sections
+  async function fetchCoursesAndSections() {
+    const dept_code = document.getElementById('dept_code').value.trim();
+    const year = document.getElementById('year').value.trim();
+    if (!dept_code || !year) return;
+
+    try {
+      const res = await fetch(`/api/fetch-courses-sections?dept_code=${encodeURIComponent(dept_code)}&year=${encodeURIComponent(year)}`);
+      const data = await res.json();
+
+      const courseSelect = document.getElementById('courseSelect');
+      const sectionSelect = document.getElementById('sectionSelect');
+      courseSelect.innerHTML = '<option value="">Select...</option>';
+      sectionSelect.innerHTML = '<option value="">Select...</option>';
+
+      if (!Array.isArray(data) || !data.length) return;
+
+      const courses = [...new Set(data.map(row => row.course))];
+      courses.forEach(c => {
+        courseSelect.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+
+      courseSelect.onchange = () => {
+        sectionSelect.innerHTML = '<option value="">Select...</option>';
+        data.filter(r => r.course === courseSelect.value)
+            .forEach(r => {
+              sectionSelect.innerHTML += `<option value="${r.section}">${r.section}</option>`;
+            });
+      };
+    } catch (err) {
+      console.error('Error fetching courses/sections:', err);
+    }
+  }
+
+  document.getElementById('dept_code').addEventListener('change', fetchCoursesAndSections);
+  document.getElementById('year').addEventListener('change', fetchCoursesAndSections);
+
+  // Render students list
+  function renderStudents() {
+    const list = document.getElementById('studentsList');
+    list.innerHTML = '';
+    if (!students.length) {
+      list.innerHTML = '<em>No students loaded</em>';
+      return;
+    }
+    students.forEach((s, i) => {
+      const div = document.createElement('div');
+      div.className = 'student-item';
+      div.innerHTML = `<label><input type="checkbox" data-i="${i}" ${s.checked ? 'checked' : ''}> ${s.reg_no} - ${s.name}</label><span>${s.father_mobile}</span>`;
+      list.appendChild(div);
+    });
+    list.querySelectorAll('input[type=checkbox]').forEach(chk => {
+      chk.addEventListener('change', e => {
+        students[e.target.dataset.i].checked = e.target.checked;
+      });
+    });
+  }
+
+  // Fetch students from backend
+  document.getElementById('fetchStudents').onclick = async () => {
+    const body = {
+      dept_code: document.getElementById('dept_code').value,
+      year: document.getElementById('year').value,
+      course: document.getElementById('courseSelect').value,
+      section: document.getElementById('sectionSelect').value,
+      reg_from: document.getElementById('reg_from').value,
+      reg_to: document.getElementById('reg_to').value
+    };
+
+    if (!body.dept_code && !body.year && !body.reg_from && !body.reg_to) {
+      return alert('Please select Dept/Year or enter Reg No range.');
+    }
+
+    const res = await fetch('/api/get-students-for-sms', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const json = await res.json();
+    if (json.success) {
+      students = json.data.map(s => ({ ...s, checked: true }));
+      renderStudents();
+    } else {
+      alert(json.message || 'Error fetching students');
+    }
+  };
+
+  // Select/Clear All
+  document.getElementById('selectAll').onclick = () => { students.forEach(s => s.checked = true); renderStudents(); };
+  document.getElementById('clearAll').onclick = () => { students.forEach(s => s.checked = false); renderStudents(); };
+
+  // Send SMS
+  document.getElementById('sendBtn').onclick = async () => {
+    const selected = students.filter(s => s.checked).map(s => s.reg_no);
+    if (!selected.length) return alert('No students selected');
+
+    if (!confirm(`You are about to send SMS to ${selected.length} students. Continue?`)) return;
+
+    const payload = {
+      reg_nos: selected,
+      senderId: document.getElementById('senderId').value,
+      template: document.getElementById('templateType').value
+    };
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    document.getElementById('progress').style.color = 'blue';
+    document.getElementById('progress').innerText = 'Sending...';
+
+    try {
+      const res = await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      console.log('Provider Response (frontend):', json.providerResponse);
+
+      document.getElementById('progress').style.color = json.success ? 'green' : 'red';
+      document.getElementById('progress').innerText = json.message || (json.success ? 'Sent successfully' : 'Failed to send');
+    } catch (err) {
+      document.getElementById('progress').style.color = 'red';
+      document.getElementById('progress').innerText = 'Error sending SMS';
+    } finally {
+      btn.disabled = false;
+    }
+  };
+</script>
+</body>
+</html>

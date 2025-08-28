@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impose Fines</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #1d1d1d;
+      color: #000;
+    }
+
+    .main-container {
+      display: flex;
+      height: 100vh;
+      flex-direction: row;
+    }
+
+    .sidebar {
+      width: 270px;
+      background-color: rgb(247, 201, 155);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: top 0.3s ease-in-out;
+    }
+
+    .sidebar h2 {
+      margin: 40px 20px 20px 20px;
+      color: black;
+      font-size: 18px;
+    }
+
+    .menu {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .menu li {
+      margin-bottom: 15px;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .menu li a:hover,
+    .menu li.active a {
+      background-color: #d4d4d4;
+      font-weight: bold;
+      transform: translateX(5px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu li a span {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu li a:hover span {
+      transform: scale(1.2);
+    }
+
+    .logout {
+      background-color: #f09000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 50%;
+      margin: 20px auto;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover {
+      background-color: #d07900;
+    }
+
+    .content {
+      flex-grow: 1;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-left: 270px;
+      padding: 20px;
+    }
+
+    .fine-box {
+      background: linear-gradient(135deg, rgba(30, 161, 242, 0.85), rgba(10, 120, 210, 0.85));
+      padding: 35px 30px;
+      border-radius: 20px;
+      color: white;
+      max-width: 500px;
+      margin: 0 auto;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.22);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .fine-box:hover {
+      transform: scale(1.01);
+      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .fine-box h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .fine-box input,
+    .fine-box textarea,
+    .fine-box select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #000;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .fine-box input:focus,
+    .fine-box textarea:focus,
+    .fine-box select:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(30, 161, 242, 0.8);
+    }
+
+    .fine-box button {
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .fine-box button:hover {
+      background-color: #218838;
+      transform: scale(1.05);
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1f75cb;
+      color: white;
+      font-size: 24px;
+      padding: 12px 18px;
+      border-radius: 50px;
+      z-index: 9999;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        top: -100%;
+        position: fixed;
+        max-height: 90vh;
+        z-index: 999;
+      }
+
+      .sidebar.open {
+        top: 0;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2><strong>ID:</strong> <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="knowaboutstd1.html"><span>👤</span> Know about Student</a></li>
+        <li><a href="editstudentdetails.html"><span>✏️</span> Edit Student Details</a></li>
+        <li><a href="sendnotification.html"><span>📨</span> Send Notification</a></li>
+        <li><a href="updatefee.html"><span>💵</span> Update Fee</a></li>
+        <li class="active"><a href="#"><span>💰</span> Impose Fines</a></li>
+        <li><a href="addstudent.html"><span>➕</span> Add Student</a></li>
+        <li><a href="mark_attendance.html"><span>📝</span> Mark Attendance</a></li>
+        <li><a href="backlogs.html"><span>📚</span> Find Backlogs</a></li>
+        <li><a href="mycounselling.html"><span>📋</span> View Counselling</a></li>
+        <li><a href="staffsettings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="fine-box">
+      <h2>Impose Fine</h2>
+<input type="text" id="studentId" placeholder="Student User ID" required />
+
+<select id="fineYear" required>
+  <option value="" disabled selected>Select Academic Year</option>
+  <option value="1">1st Year</option>
+  <option value="2">2nd Year</option>
+  <option value="3">3rd Year</option>
+  <option value="4">4th Year</option>
+</select>
+
+<textarea id="reason" rows="3" placeholder="Reason"></textarea>
+<input type="number" id="amount" placeholder="Amount (₹)" required />
+
+        <button onclick="imposeFine()">Impose Fine</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // 🔐 Unauthorized Login Check
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Login Required',
+      text: 'Please login to access this page.'
+    }).then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    document.getElementById("userId").textContent = userId;
+
+    function imposeFine() {
+      const studentId = document.getElementById("studentId").value.trim();
+      const reason = document.getElementById("reason").value.trim();
+      const amount = parseInt(document.getElementById("amount").value.trim());
+      const academic_year = document.getElementById("fineYear").value;
+      const staffId = userId;
+
+      if (!studentId || isNaN(amount) || !academic_year) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Fields",
+          text: "Please enter all required fields including Year and Amount."
+        });
+        return;
+      }
+
+      if (!reason) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Reason",
+          text: "Please enter the reason for the fine."
+        });
+        return;
+      }
+
+      fetch("/impose-fine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: studentId,
+          reason,
+          amount,
+          academic_year,
+          staffId
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        Swal.fire({
+          icon: data.success ? "success" : "error",
+          title: data.success ? "Fine Imposed" : "Error",
+          text: data.message
+        });
+
+        if (data.success) {
+          document.getElementById("studentId").value = "";
+          document.getElementById("reason").value = "";
+          document.getElementById("amount").value = "";
+          document.getElementById("fineYear").value = "";
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to impose fine. Please try again."
+        });
+      });
+    }
+
+    function toggleMobileMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    function logout() {
+      localStorage.removeItem("userId");
+      if ("caches" in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+      }
+      window.location.replace("index.html");
+    }
+  }
+</script>
+</body>
+</html>
+

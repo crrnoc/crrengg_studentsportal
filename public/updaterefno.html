@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Update Fee Payment</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+     * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #2e2e2e;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+.photo-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+
+.home-icon {
+  margin-top: 35px;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #fff;
+  border-radius: 50%;
+  font-size: 22px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  color: #000;
+  transition: transform 0.2s ease;
+}
+
+.home-icon:hover {
+  transform: scale(1.1);
+  background-color: #f09000;
+  color: white;
+}
+    .sidebar {
+      width: 270px;
+      background-color: rgb(247, 201, 155);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      transition: top 0.3s ease-in-out;
+      z-index: 999;
+    }
+
+    .sidebar h2 {
+      margin: 40px 20px 20px 20px;
+      color: black;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .sidebar-photo {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  border: 3px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+    .menu {
+      list-style: none;
+      padding: 0;
+    }
+
+    .menu li {
+      list-style: none;
+      margin-bottom: 15px;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .menu li a:hover,
+    .menu li.active a {
+      background-color: #d4d4d4;
+      font-weight: bold;
+      transform: translateX(5px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu li a span {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu li a:hover span {
+      transform: scale(1.2);
+    }
+
+    .logout {
+      background-color: #f09000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 50%;
+      margin: 20px auto 0;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover {
+      background-color: #d07900;
+    }
+
+  .main {
+    flex-grow: 1;
+    background-color: white;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 270px;
+  }
+
+  .form {
+    background: linear-gradient(135deg, rgba(54, 169, 225, 0.85), rgba(30, 130, 190, 0.85));
+    padding: 35px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    color: #fff;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.22);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .form:hover {
+    transform: scale(1.01);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  .form .input-group {
+    margin-bottom: 20px;
+  }
+
+  .form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  .form input,
+  .form select {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    margin-top: 6px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+    font-size: 15px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .form input:focus,
+  .form select:focus {
+    outline: none;
+    box-shadow: 0 0 6px rgba(54, 169, 225, 0.8);
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+  }
+
+  .buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .buttons .update {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .buttons:hover {
+    transform: scale(1.01);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f75cb;
+    color: white;
+    font-size: 24px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    z-index: 9999;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      top: -100%;
+      width: 100%;
+      max-height: 90vh;
+    }
+
+    .sidebar.open {
+      top: 0;
+    }
+
+    .mobile-toggle {
+      display: block;
+    }
+
+    .main {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .form {
+      width: 100%;
+      padding: 25px 15px;
+    }
+  }
+  /* Remove arrows from number inputs */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {-moz-appearance: textfield; /* Firefox */
+}
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+     <div class="photo-container">
+  <div class="photo-wrapper">
+    <a href="studentwelcome.html" class="home-icon" title="Home">🏠</a>
+    <img id="sidebarPhoto" class="sidebar-photo" style="display: none;" />
+  </div>
+</div>
+
+     <h2>ID: <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="studentdetails.html"><span>📄</span> Student details</a></li>
+        <li><a href="feedetails.html"><span>🎓</span> Fee details</a></li>
+        <li class="active"><a href="#"><span>🔄</span> Update fee payment</a></li>
+        <li><a href="attendence.html"><span>📅</span> View Attendance</a></li>
+        <li><a href="studentresults.html"><span>📊</span> Student Results</a></li>
+        <li><a href="generatenoc.html"><span>➕</span> Generate NOC</a></li>
+        <li><a href="settings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <div class="form">
+         <div class="input-group">
+  <label>Select Academic Year</label>
+  <select id="academicYear" required>
+    <option value="" disabled selected>Choose Year</option>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+  </select>
+</div>
+        <div class="input-group">
+          <label>Tuition Fee</label>
+          <input type="text" id="tuition" placeholder="Enter DU number">
+          <input type="number" id="tuitionAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="input-group">
+          <label>Hostel Fee</label>
+          <input type="text" id="hostel" placeholder="Enter DU number">
+          <input type="number" id="hostelAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="input-group">
+          <label>Bus Fee</label>
+          <input type="text" id="bus" placeholder="Enter DU number">
+          <input type="number" id="busAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="input-group">
+          <label>University Fee</label>
+          <input type="text" id="university" placeholder="Enter DU number">
+          <input type="number" id="universityAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="input-group">
+          <label>Semester Fee</label>
+          <input type="text" id="semester" placeholder="Enter DU number">
+          <input type="number" id="semesterAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="input-group">
+          <label>Library Dues</label>
+          <input type="text" id="library" placeholder="Enter DU number">
+          <input type="number" id="libraryAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="input-group">
+          <label>Fines</label>
+          <input type="text" id="fines" placeholder="Enter DU number">
+          <input type="number" id="finesAmount" placeholder="Enter Amount Paid">
+        </div>
+        <div class="buttons">
+          <button class="update">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // 🔐 Unauthorized login check
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Login Required',
+      text: 'Please login to access this page.'
+    }).then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    // ✅ Show UserID in sidebar
+    document.getElementById("userId").textContent = userId || "Unknown";
+
+    // ✅ Load sidebar photo
+    fetch(`/student/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log("Student API Response:", data); // Debug
+        const photo = document.getElementById("sidebarPhoto");
+        if (photo && (data.photo_url || data.photo || data.image_url)) {
+          photo.src = data.photo_url || data.photo || data.image_url;
+          photo.style.display = "block";
+        }
+      })
+      .catch(err => {
+        console.warn("⚠️ Failed to load photo:", err.message);
+      });
+  }
+
+  // ✅ Submit DU Numbers
+  document.querySelector(".update").addEventListener("click", () => {
+    const paymentData = [
+      { type: "Tuition Fee", du: tuition.value, amount: tuitionAmount.value },
+      { type: "Hostel Fee", du: hostel.value, amount: hostelAmount.value },
+      { type: "Bus Fee", du: bus.value, amount: busAmount.value },
+      { type: "University Fee", du: university.value, amount: universityAmount.value },
+      { type: "Semester Fee", du: semester.value, amount: semesterAmount.value },
+      { type: "Library Dues", du: library.value, amount: libraryAmount.value },
+      { type: "Fines", du: fines.value, amount: finesAmount.value }
+    ].filter(entry => entry.du.trim() !== "" && entry.amount.trim() !== "");
+
+    if (paymentData.length === 0) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Missing DU Number",
+        text: "Please enter at least one DU number."
+      });
+    }
+
+    const academicYear = parseInt(document.getElementById("academicYear").value);
+    if (!academicYear) {
+      return Swal.fire({
+        icon: "info",
+        title: "Academic Year Required",
+        text: "Please select academic year."
+      });
+    }
+
+    // ✅ Show confirmation popup
+    const html = `
+      <div style="text-align:left; font-size: 14px;">
+        <strong>Academic Year:</strong> ${academicYear}<br><br>
+        ${paymentData.map(p => `
+          <strong>${p.type}</strong><br>
+          DU: ${p.du}<br>
+          Amount: ₹${p.amount}
+        `).join("<hr>")}
+      </div>
+    `;
+
+    Swal.fire({
+      title: "Verify Fee Details",
+      html,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Proceed",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#28a745"
+    }).then(result => {
+      if (!result.isConfirmed) return;
+
+      // ✅ Proceed with fetch
+      fetch("/submit-du", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, payments: paymentData, academic_year: academicYear })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            Swal.fire({
+              icon: "error",
+              title: "Duplicate Reference",
+              text: data.message || "This DU number already exists."
+            });
+          } else {
+            Swal.fire({
+              icon: "success",
+              title: "Success",
+              text: data.message || "DU numbers submitted successfully."
+            }).then(() => {
+              // 🔄 Clear inputs after success
+              document.querySelectorAll(".form input").forEach(inp => inp.value = "");
+              document.getElementById("academicYear").value = "";
+            });
+          }
+        })
+        .catch(err => {
+          console.error("Error submitting DU numbers:", err);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Something went wrong while submitting DU numbers."
+          });
+        });
+    });
+  });
+
+  // ✅ DU Numbers: auto-uppercase + only A-Z and 0-9
+  document.querySelectorAll('.form input[type="text"]').forEach(input => {
+    input.addEventListener('input', () => {
+      input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+  });
+
+  // ✅ Amounts: only numbers
+  document.querySelectorAll('.form input[type="number"]').forEach(input => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^\d]/g, '');
+    });
+  });
+
+  // ✅ Enter key to move to next field
+  document.querySelectorAll('.form input').forEach((input, index, inputs) => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        let nextInput = inputs[index + 1];
+        if (nextInput) nextInput.focus();
+      }
+    });
+  });
+
+  // ✅ SweetAlert2 Logout
+  function logout() {
+    Swal.fire({
+      title: 'Logout?',
+      text: "Are you sure you want to logout?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, Logout'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("userId");
+        if ("caches" in window) {
+          caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+        }
+        window.location.replace("index.html");
+      }
+    });
+  }
+
+  // ✅ Toggle sidebar for mobile
+  function toggleMobileMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
+
+
+
+

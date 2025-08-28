@@ -1,0 +1,358 @@
+<!-- 🎯 Edit Profile Page with Mobile + Dynamic User ID + All Fields -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Student</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #1d1d1d;
+    }
+    .main-container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 270px;
+      background-color: rgb(247, 201, 155);
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      margin: 40px 0 20px;
+      color: black;
+      font-size: 18px;
+    }
+    .menu {
+      list-style: none;
+      padding: 0;
+    }
+    .menu li {
+      margin-bottom: 15px;
+    }
+    .menu li a {
+      color: black;
+      text-decoration: none;
+      padding: 12px 20px;
+      display: block;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .menu li a:hover,
+    .menu li.active a {
+      background-color: #d4d4d4;
+      font-weight: bold;
+    }
+    .logout {
+      background-color: #f09000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      width: 60%;
+    }
+    .main {
+      margin-left: 270px;
+      flex-grow: 1;
+      padding: 40px;
+      background: white;
+      overflow-y: auto;
+    }
+    .form-box {
+      background: linear-gradient(135deg, rgba(54, 169, 225, 0.85), rgba(30, 130, 190, 0.85));
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 700px;
+      color: white;
+      margin: 0 auto;
+    }
+    .form-box input,
+    .form-box select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      color: #000;
+    }
+    .form-box label {
+      font-weight: bold;
+    }
+    .form-box button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1D73D2;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .form-box button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    #preview {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* 📱 Mobile View */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1f75cb;
+      color: white;
+      font-size: 24px;
+      padding: 12px 18px;
+      border-radius: 50px;
+      z-index: 2000;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: 90vh;
+        top: -100%;
+        left: 0;
+        position: fixed;
+        transition: top 0.3s ease-in-out;
+      }
+      .sidebar.open {
+        top: 0;
+      }
+      .main {
+        margin-left: 0;
+        padding: 20px;
+      }
+      .mobile-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+<script>
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    Swal.fire({ icon: "warning", title: "Unauthorized", text: "Please login to access this page" }).then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("userId").textContent = userId;
+    });
+  }
+</script>
+
+<div class="main-container">
+  <div class="sidebar">
+    <h2><strong>ID:</strong> <span id="userId">Staff</span></h2>
+    <ul class="menu">
+      <li><a href="knowaboutstd1.html">👤 Know Student</a></li>
+      <li class="active"><a href="#">✏️ Edit Profile</a></li>
+      <li><a href="sendnotification.html">📨 Send Notification</a></li>
+      <li><a href="updatefee.html">💵 Update Fee</a></li>
+      <li><a href="imposefines.html">💰 Impose Fines</a></li>
+      <li><a href="addstudent.html">➕ Add Student</a></li>
+      <li><a href="mark_attendance.html"><span>📝</span> Mark Attendance</a></li>
+      <li><a href="backlogs.html">📚 Find Backlogs</a></li>
+      <li><a href="mycounselling.html">📋 View Counselling</a></li>
+      <li><a href="staffsettings.html">⚙️ Settings</a></li>
+    </ul>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="form-box">
+      <h2>Edit Student Profile</h2>
+      <div id="fetchBox">
+        <input id="regInput" placeholder="Enter Reg No" />
+        <button onclick="fetchStudentData()">Fetch</button>
+      </div>
+      <div id="formContainer"></div>
+    </div>
+  </div>
+</div>
+<div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+
+<script>
+function logout() {
+  localStorage.removeItem("userId");
+  location.href = "index.html";
+}
+
+function toggleMobileMenu() {
+  document.querySelector(".sidebar").classList.toggle("open");
+}
+
+function fetchStudentData() {
+  const reg = document.getElementById("regInput").value.trim();
+  if (!reg) return Swal.fire("Enter registration number");
+
+  fetch(`/student/${reg}`)
+    .then(res => res.json())
+    .then(data => showEditForm(data))
+    .catch(() => Swal.fire("Student not found"));
+}
+
+function showEditForm(data) {
+  document.getElementById("fetchBox").style.display = "none";
+  const c = document.getElementById("formContainer");
+  c.innerHTML = `
+    <form id="editForm" enctype="multipart/form-data">
+      <input type="hidden" name="userId" value="${data.userId}" />
+      <label>Reg No</label><input name="reg_no" value="${data.reg_no}" required />
+      <label>Name</label><input name="name" value="${data.name}" required />
+      <label>DOB</label><input type="date" name="dob" value="${data.dob ? data.dob.split('T')[0] : ''}" required />
+      <label>Unique ID</label><input name="uniqueId" value="${data.uniqueId}" required />
+      <label>Aadhar No</label><input name="aadhar_no" value="${data.aadhar_no || ''}" />
+      <label>Mobile No</label><input name="mobile_no" value="${data.mobile_no || ''}" required />
+      <label>Email</label><input type="email" name="email" value="${data.email}" required />
+      <label>Course</label><input name="course" value="${data.course}" required />
+      <label>Dept Code</label><input name="dept_code" value="${data.dept_code || ''}" />
+      <label>Year</label><input name="year" value="${data.year}" required />
+      <label>Semester</label><input name="semester" value="${data.semester}" required />
+      <label>Section</label><input name="section" value="${data.section}" required />
+      <label>Father Name</label><input name="father_name" value="${data.father_name}" required />
+      <label>Father Mobile</label><input name="father_mobile" value="${data.father_mobile}" required />
+      <label>Counsellor Name</label><input name="counsellor_name" value="${data.counsellor_name}" required />
+      <label>Counsellor Mobile</label><input name="counsellor_mobile" value="${data.counsellor_mobile}" required />
+      <label>Admission Type</label><input name="admission_type" value="${data.admission_type}" required />
+      <label>Upload New Photo (max 100KB)</label>
+      <input type="file" name="photo" accept="image/*" onchange="previewPhoto(this)" />
+      <img id="preview" src="${data.photo_url || ''}" />
+      <button type="submit" id="submitBtn">Update</button>
+    </form>
+  `;
+
+  document.getElementById("editForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById("submitBtn");
+    const file = form.querySelector("input[name='photo']").files[0];
+    if (file && file.size > 102400) {
+      return Swal.fire("File too large", "Max size: 100KB", "error");
+    }
+   if (!validateFormFields(form)) return;
+btn.disabled = true;
+const formData = new FormData(form);
+    const res = await fetch("/editprofile", { method: "POST", body: formData });
+    const out = await res.json();
+    Swal.fire(out.message.includes("success") ? "Success" : "Error", out.message, out.message.includes("success") ? "success" : "error");
+    btn.disabled = false;
+    if (out.message.includes("success")) {
+      form.remove();
+      document.getElementById("fetchBox").style.display = "block";
+    }
+  });
+}
+
+function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => document.getElementById("preview").src = e.target.result;
+  reader.readAsDataURL(file);
+}
+ function validateFormFields(form) {
+  const name = form.name.value.trim().toUpperCase();
+  const uniqueId = form.uniqueId.value.trim().toUpperCase();
+  const aadhar = form.aadhar_no.value.trim();
+  const mobile = form.mobile_no.value.trim();
+  const email = form.email.value.trim();
+  const fatherName = form.father_name.value.trim().toUpperCase();
+  const fatherMobile = form.father_mobile.value.trim();
+  const counsellorName = form.counsellor_name.value.trim().toUpperCase();
+  const counsellorMobile = form.counsellor_mobile.value.trim();
+
+  // Name validations
+  if (!/^[A-Z\s]+$/.test(name)) {
+    Swal.fire("Invalid Name", "Name must contain only alphabets in CAPITAL letters.", "error");
+    return false;
+  }
+
+  if (!/^[A-Z0-9]{16}$/.test(uniqueId)) {
+    Swal.fire("Invalid Unique ID", "Unique ID must be 16 characters, CAPITAL letters/numbers only.", "error");
+    return false;
+  }
+
+  if (!/^[0-9]{12}$/.test(aadhar)) {
+    Swal.fire("Invalid Aadhar", "Aadhar number must be exactly 12 digits.", "error");
+    return false;
+  }
+
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    Swal.fire("Invalid Mobile", "Mobile number must be exactly 10 digits.", "error");
+    return false;
+  }
+
+ if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
+  Swal.fire("Invalid Email", "Enter a valid email address like abc@example.com", "error");
+  return false;
+}
+
+  // Father & Counsellor name validation
+  if (!/^[A-Z\s]+$/.test(fatherName)) {
+    Swal.fire("Invalid Father Name", "Father name must contain only CAPITAL letters.", "error");
+    return false;
+  }
+
+  if (!/^[0-9]{10}$/.test(fatherMobile)) {
+    Swal.fire("Invalid Father Mobile", "Father mobile number must be exactly 10 digits.", "error");
+    return false;
+  }
+
+  if (!/^[A-Z\s]+$/.test(counsellorName)) {
+    Swal.fire("Invalid Counsellor Name", "Counsellor name must contain only CAPITAL letters.", "error");
+    return false;
+  }
+
+  if (!/^[0-9]{10}$/.test(counsellorMobile)) {
+    Swal.fire("Invalid Counsellor Mobile", "Counsellor mobile number must be exactly 10 digits.", "error");
+    return false;
+  }
+
+  // Auto-CAPS
+  form.name.value = name;
+  form.uniqueId.value = uniqueId;
+  form.father_name.value = fatherName;
+  form.counsellor_name.value = counsellorName;
+
+  return true;
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Mid Marks</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #1d1d1d;
+      color: #000;
+    }
+
+    .main-container {
+      display: flex;
+      height: 100vh;
+      flex-direction: row;
+    }
+
+    .sidebar {
+      width: 270px;
+      background-color: rgb(247, 201, 155);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: top 0.3s ease-in-out;
+    }
+
+    .sidebar h2 {
+      margin: 40px 20px 20px 20px;
+      color: black;
+      font-size: 18px;
+    }
+
+    .menu {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .menu li {
+      margin-bottom: 15px;
+    }
+
+    .menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: black;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .menu li a:hover,
+    .menu li.active a {
+      background-color: #d4d4d4;
+      font-weight: bold;
+      transform: translateX(5px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      text-decoration: none;
+    }
+
+    .logout {
+      background-color: #f09000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 50%;
+      margin: 20px auto;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover {
+      background-color: #d07900;
+    }
+
+    .content {
+      flex-grow: 1;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-left: 270px;
+      padding: 20px;
+    }
+
+    .upload-box {
+      background: linear-gradient(135deg, rgba(91, 192, 222, 0.85), rgba(60, 150, 200, 0.85));
+      border-radius: 20px;
+      padding: 30px 25px;
+      text-align: center;
+      width: 400px;
+      color: white;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .upload-box h3 {
+      font-size: 16px;
+      color: black;
+      margin-bottom: 20px;
+    }
+
+    .file-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .file-label:hover {
+      background-color: #0056b3;
+    }
+
+    .upload-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .upload-btn:hover {
+      background-color: #1c7c31;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1f75cb;
+      color: white;
+      font-size: 24px;
+      padding: 12px 18px;
+      border-radius: 50px;
+      z-index: 9999;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        top: -100%;
+        position: fixed;
+        max-height: 90vh;
+        z-index: 999;
+      }
+
+      .sidebar.open {
+        top: 0;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2><strong>ID:</strong> <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="knowaboutstd1.html">👤 Know about Student</a></li>
+        <li><a href="editstudentdetails.html">✏️ Edit Student Details</a></li>
+        <li><a href="sendnotification.html">📨 Send Notification</a></li>
+        <li><a href="updatefee.html">💵 Update Fee</a></li>
+        <li><a href="imposefines.html">💰 Impose Fines</a></li>
+        <li><a href="addstudent.html">➕ Add Student</a></li>
+        <li><a href="backlogs.html">📚 Find Backlogs</a></li>
+        <li><a href="mycounselling.html">📋 View Counselling</a></li>
+        <li><a href="staffsettings.html">⚙️ Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="upload-box">
+        <h3>Upload Mid Internal Marks (CSV Only)</h3>
+        <label class="file-label" for="midMarksFile">Choose File</label>
+        <input type="file" id="midMarksFile" accept=".csv" style="display: none;" />
+        <div id="fileName"></div>
+        <button class="upload-btn" onclick="uploadMidMarks()">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+  <script>
+    // Show current userId
+    const userId = localStorage.getItem("userId");
+    document.getElementById("userId").textContent = userId;
+
+    // File name display
+    document.getElementById("midMarksFile").addEventListener("change", function () {
+      document.getElementById("fileName").textContent = this.files[0]?.name || "";
+    });
+
+    function uploadMidMarks() {
+      const file = document.getElementById("midMarksFile").files[0];
+      if (!file) {
+        return Swal.fire("No File Selected", "Please choose a CSV file.", "warning");
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      fetch("/upload-midmarks", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          Swal.fire("Upload Result", data.message || "Upload complete!", "success");
+        })
+        .catch(() => {
+          Swal.fire("Error", "Upload failed.", "error");
+        });
+    }
+
+    function logout() {
+      localStorage.removeItem("userId");
+      window.location.href = "index.html";
+    }
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

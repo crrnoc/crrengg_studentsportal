@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HOD Mid Marks</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      display: flex;
+      min-height: 100vh;
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .sidebar img {
+      height: 50px;
+      margin: 0 auto 15px auto;
+      display: block;
+    }
+
+    .sidebar h4 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .menu a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      transition: all 0.3s ease;
+    }
+
+    .menu a:hover,
+    .menu .active {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+
+    .logout {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .logout:hover { background-color: #CA6F1E; }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 90;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active { display: block; }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      flex: 1;
+      padding: 40px;
+      transition: filter 0.3s ease;
+      margin-top: 36px;
+    }
+
+    .main-content.shifted { filter: blur(2px); pointer-events: none; }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: bold;
+      color: #2C3E50;
+    }
+
+    .form-group {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .form-group input,
+    .form-group select {
+      flex: 1;
+      min-width: 30%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .no-data {
+      text-align: center;
+      margin-top: 20px;
+      color: red;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .main-content { margin-left: 0; padding: 20px; }
+      .sidebar { left: -260px; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Mobile toggle -->
+  <div class="mobile-toggle" onclick="toggleSidebar()">☰ Menu</div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <img src="crrengglogo.png" alt="College Logo"/>
+    <h4 id="welcomeText">Welcome HOD</h4>
+    <div class="menu">
+      <a href="hodpanel.html">🏠 Dashboard</a>
+      <a href="students.html">🎓 Students</a>
+      <a href="hodfeesearch.html">💰 Fee Search</a>
+      <a href="hodbacklogsview.html">📚 Backlogs</a>
+      <a href="hodmidmarks.html" class="active">📝 Mid Marks</a>
+      <a href="hodnotifications.html">📢 Send Notifications</a>
+    </div>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+    <h2>Mid Marks Viewer</h2>
+    <div class="form-group">
+      <input type="text" id="regno" placeholder="Enter RegNo (Hallticket)" />
+      <select id="year">
+        <option value="1">1st Year</option>
+        <option value="2">2nd Year</option>
+        <option value="3">3rd Year</option>
+        <option value="4">4th Year</option>
+      </select>
+      <select id="semester">
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+      </select>
+      <button onclick="fetchMarks()">Search</button>
+    </div>
+    <div id="studentInfo" style="margin-top: 20px; font-weight: bold;"></div>
+    <div id="resultContainer"></div>
+    <div id="noData" class="no-data"></div>
+  </div>
+
+  <script>
+    const userId = localStorage.getItem("userId");
+    const welcomeText = document.getElementById("welcomeText");
+
+    if (!userId || !userId.startsWith("HOD")) {
+      alert("Please login as HOD");
+      window.location.href = "index.html";
+    } else {
+      const dept = userId.replace("HOD", "");
+      welcomeText.textContent = `Welcome Head of Department - ${dept}`;
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      const mainContent = document.getElementById("main-content");
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("active");
+      mainContent.classList.toggle("shifted");
+    }
+
+    async function fetchMarks() {
+      const regno = document.getElementById("regno").value.trim();
+      const year = document.getElementById("year").value;
+      const semester = document.getElementById("semester").value;
+
+      const resultContainer = document.getElementById("resultContainer");
+      const noData = document.getElementById("noData");
+      const studentInfo = document.getElementById("studentInfo");
+
+      resultContainer.innerHTML = "";
+      noData.textContent = "";
+      studentInfo.textContent = "";
+
+      if (!regno) {
+        noData.textContent = "Please enter a valid registration number.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/midmarks/search?regno=${regno}&year=${year}&semester=${semester}`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+          noData.textContent = "No data found for the entered details.";
+          return;
+        }
+
+        studentInfo.textContent = `Results for: ${data[0].regno} | Year: ${year}, Sem: ${semester}`;
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Subject Code</th>
+              <th>Mid 1</th>
+              <th>A1</th>
+              <th>Q1</th>
+              <th>Mid 2</th>
+              <th>A2</th>
+              <th>Q2</th>
+              <th>LDS/Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(row => `
+              <tr>
+                <td>${row.subcode}</td>
+                <td>${row.mid1}</td>
+                <td>${row.a1}</td>
+                <td>${row.q1}</td>
+                <td>${row.mid2}</td>
+                <td>${row.a2}</td>
+                <td>${row.q2}</td>
+                <td>${row.lds_or_status}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+        resultContainer.appendChild(table);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        noData.textContent = "Error fetching data. Please try again later.";
+      }
+    }
+  </script>
+</body>
+</html>

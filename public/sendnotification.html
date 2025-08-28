@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Notification</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #1d1d1d;
+    color: #000;
+  }
+
+  .main-container {
+    display: flex;
+    height: 100vh;
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 270px;
+    background-color: rgb(247, 201, 155);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    overflow-y: auto;
+    transition: top 0.3s ease-in-out;
+  }
+
+  .sidebar h2 {
+    margin: 40px 20px 20px 20px;
+    color: black;
+    font-size: 18px;
+  }
+
+  .menu {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .menu li {
+    margin-bottom: 15px;
+  }
+
+  .menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: black;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .menu li a:hover,
+  .menu li.active a {
+    background-color: #d4d4d4;
+    font-weight: bold;
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .menu li a span {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .menu li a:hover span {
+    transform: scale(1.2);
+  }
+
+  .logout {
+    background-color: #f09000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 50%;
+    margin: 20px auto;
+    transition: background 0.3s ease;
+  }
+
+  .logout:hover {
+    background-color: #d07900;
+  }
+  .main {
+    flex-grow: 1;
+    background-color: white;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 270px;
+  }
+
+  .form {
+    background: linear-gradient(135deg, rgba(54, 169, 225, 0.85), rgba(30, 130, 190, 0.85));
+    padding: 35px 30px;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    color: white;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .form:hover {
+    transform: scale(1.01);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  .form h3 {
+    margin-bottom: 20px;
+    color: white;
+    text-align: center;
+  }
+
+  .form input,
+  .form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #000;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .form input:focus,
+  .form textarea:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(54, 169, 225, 0.9);
+  }
+
+  .form button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    font-size: 16px;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+
+  .form button:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f75cb;
+    color: white;
+    font-size: 24px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    z-index: 9999;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: fixed;
+    left: 0;
+    top: -100%; /* hide sidebar initially */
+    max-height: 90vh;
+    background-color: rgb(247, 201, 155);
+    transition: top 0.3s ease-in-out;
+  }
+
+  .sidebar.open {
+    top: 0; /* slide down when open */
+  }
+
+  .main {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .mobile-toggle {
+    display: block;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2><strong>ID:</strong> <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="knowaboutstd1.html"><span>👤</span> Know about Student</a></li>
+        <li><a href="editstudentdetails.html"><span>✏️</span> Edit Student Details</a></li>
+        <li class="active"><a href="#"><span>📨</span> Send Notification</a></li>
+        <li><a href="updatefee.html"><span>💵</span> Update Fee</a></li>
+        <li><a href="imposefines.html"><span>💰</span> Impose Fines</a></li>
+        <li><a href="addstudent.html"><span>➕</span> Add Student</a></li>
+        <li><a href="mark_attendance.html"><span>📝</span> Mark Attendance</a></li>
+        <li><a href="backlogs.html"><span>📚</span> Find Backlogs</a></li>
+        <li><a href="mycounselling.html"><span>📋</span> View Counselling</a></li>
+        <li><a href="staffsettings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <div class="form">
+        <h3>Send Notification</h3>
+        <input type="text" id="studentId" placeholder="Eg : 23B81A4601-66" required />
+        <textarea id="message" rows="4" placeholder="Enter message (e.g., Please pay tuition fees...)" required></textarea>
+        <button onclick="sendNotification()">Send Notification</button>
+      </div>
+    </div>
+  </div>
+<div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // 🔐 Unauthorized login check
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Login Required',
+      text: 'Please login to access this page.'
+    }).then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    document.getElementById("userId").textContent = userId;
+
+    // 🧠 Expand reg.no ranges like 23B81A4601-10
+    function expandRegNos(input) {
+      const parts = input.split(',');
+      const finalList = [];
+
+      parts.forEach(part => {
+        part = part.trim();
+        if (part.includes('-')) {
+          const [start, end] = part.split('-');
+          const prefix = start.slice(0, -2);
+          const startNum = parseInt(start.slice(-2));
+          const endNum = parseInt(end);
+
+          for (let i = startNum; i <= endNum; i++) {
+            const suffix = i.toString().padStart(2, '0');
+            finalList.push(`${prefix}${suffix}`);
+          }
+        } else {
+          finalList.push(part);
+        }
+      });
+
+      return finalList;
+    }
+
+    function sendNotification() {
+      const studentIdInput = document.getElementById("studentId").value.trim();
+      const message = document.getElementById("message").value.trim();
+      const btn = document.querySelector(".form button");
+
+      if (!studentIdInput || !message) {
+        Swal.fire({ icon: "warning", title: "Missing Information", text: "Enter reg. nos and message." });
+        return;
+      }
+
+      const userIds = expandRegNos(studentIdInput);
+
+      btn.disabled = true;
+      btn.textContent = "Sending...";
+
+      fetch("/send-bulk-notification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds, message })
+      })
+        .then(res => res.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.textContent = "Send Notification";
+          document.getElementById("studentId").value = "";
+          document.getElementById("message").value = "";
+
+          Swal.fire({
+            icon: data.success ? "success" : "error",
+            title: "Notification Status",
+            html: `✅ Sent: ${data.sent}<br>❌ Failed: ${data.failed}`
+          });
+        })
+        .catch(error => {
+          console.error("Error sending notification:", error);
+          btn.disabled = false;
+          btn.textContent = "Send Notification";
+          Swal.fire({ icon: "error", title: "Failed!", text: "Something went wrong. Please try again." });
+        });
+    }
+
+    function toggleMobileMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    document.querySelectorAll(".menu li a").forEach(link => {
+      link.addEventListener("click", () => {
+        if (window.innerWidth <= 768) {
+          document.querySelector('.sidebar').classList.remove('open');
+        }
+      });
+    });
+
+    function logout() {
+      localStorage.removeItem("userId");
+      if ("caches" in window) {
+        caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+      }
+      window.location.replace("index.html");
+    }
+  }
+</script>
+</body>
+</html>
+
+

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Settings</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #1d1d1d;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .container {
+    display: flex;
+    height: 100vh;
+    flex-direction: row;
+  }
+.photo-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+
+.home-icon {
+  margin-top: 35px;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #fff;
+  border-radius: 50%;
+  font-size: 22px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  color: #000;
+  transition: transform 0.2s ease;
+}
+
+.home-icon:hover {
+  transform: scale(1.1);
+  background-color: #f09000;
+  color: white;
+}
+  .sidebar {
+    width: 270px;
+    background-color: rgb(247, 201, 155);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+    transition: top 0.3s ease-in-out;
+    z-index: 999;
+  }
+
+  .sidebar h2 {
+    margin: 40px 20px 20px 20px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .sidebar-photo {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  border: 3px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+  .menu {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .menu li {
+    margin-bottom: 15px;
+  }
+
+  .menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: black;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .menu li a:hover,
+  .menu li.active a {
+    background-color: #d4d4d4;
+    font-weight: bold;
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .menu li a span {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .menu li a:hover span {
+    transform: scale(1.2);
+  }
+
+  .logout {
+    background-color: #f09000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 50%;
+    margin: 20px auto 0;
+    transition: background 0.3s ease;
+  }
+
+  .logout:hover {
+    background-color: #d07900;
+  }
+
+  .main {
+    flex-grow: 1;
+    background-color: white;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 270px;
+  }
+
+  .form {
+    background: linear-gradient(135deg, rgba(54, 169, 225, 0.85), rgba(30, 130, 190, 0.85));
+    padding: 40px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    color: white;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.22);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .form:hover {
+    transform: scale(1.01);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  .settings-box {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px 30px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .settings-box:hover {
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .settings-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .settings-box li {
+    margin-bottom: 15px;
+  }
+
+  .settings-box li a {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: #1d1d1d;
+    background-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .settings-box li a:hover {
+    background-color: #e3eef7;
+    font-weight: bold;
+    transform: translateX(5px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .settings-box li a i,
+  .settings-box li a span {
+    margin-right: 10px;
+    font-size: 18px;
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f75cb;
+    color: white;
+    font-size: 24px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    z-index: 9999;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      top: -100%;
+      left: 0;
+      width: 100%;
+      max-height: 90vh;
+      position: fixed;
+    }
+
+    .sidebar.open {
+      top: 0;
+    }
+
+    .mobile-toggle {
+      display: block;
+    }
+
+    .main {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .form {
+      width: 100%;
+      padding: 25px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="photo-container">
+  <div class="photo-wrapper">
+    <a href="studentwelcome.html" class="home-icon" title="Home">🏠</a>
+    <img id="sidebarPhoto" class="sidebar-photo" style="display: none;" />
+  </div>
+</div>
+
+      <h2>ID: <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="studentdetails.html"><span>📄</span> Student details</a></li>
+        <li><a href="feedetails.html"><span>🎓</span> Fee details</a></li>
+        <li><a href="updaterefno.html"><span>🔄</span> Update fee payment</a></li>
+        <li><a href="attendence.html"><span>📅</span> View Attendance</a></li>
+        <li><a href="studentresults.html"><span>📊</span> Student Results</a></li>
+        <li><a href="generatenoc.html"><span>➕</span> Generate NOC</a></li>
+        <li class="active"><a href="#"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <div class="form">
+        <div class="settings-box">
+          <ul>
+            <li><a href="notifications.html"><span>🔔</span> Notifications</a></li>
+            <li><a href="help&feedback.html"><i>🤝</i>Help & Feedback</a></li>
+            <li><a href="duhistory.html"><span>🗂️</span> Delete DU Entries</a></li>
+            <li><a href="faq.html"><i>❓</i>FAQ</a></li>
+            <li><a href="developerspage.html"><i>👨‍💻</i>About Developers</a></li>
+            <li><a href="privacypolicy.html"><span>📜</span> Privacy policy</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // 🔐 Unauthorized login check
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Login Required',
+      text: 'Please login to access this page.'
+    }).then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    document.getElementById("userId").textContent = userId;
+
+    // ✅ Load sidebar photo
+    fetch(`/student/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        const photo = document.getElementById("sidebarPhoto");
+        if (photo && data.photo_url) {
+          photo.src = data.photo_url;
+          photo.style.display = "block";
+        }
+      })
+      .catch(err => {
+        console.warn("⚠️ Failed to load photo:", err.message);
+      });
+  }
+
+  function toggleMobileMenu() {
+    document.querySelector('.sidebar').classList.toggle('open');
+  }
+
+  document.querySelectorAll(".menu li a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  function logout() {
+    localStorage.removeItem("userId");
+    if ("caches" in window) {
+      caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+    }
+    window.location.replace("index.html");
+  }
+</script>
+</body>
+</html>

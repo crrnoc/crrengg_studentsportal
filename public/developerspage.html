@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meet Our Developers</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Sacramento&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+      padding: 20px;
+      animation: fadeInBody 1s ease-in-out;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    h1 {
+      font-family: 'Sacramento', cursive;
+      font-size: 3.5rem;
+      color: #ffffff;
+      margin-top: 30px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #00bcd4; }
+      to { text-shadow: 0 0 20px #00bcd4, 0 0 30px #00bcd4; }
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-top: 10px;
+      color: #cccccc;
+      animation: slideIn 1s ease-in-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      font-size: 1rem;
+      padding: 10px 25px;
+      background: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 10px #00bcd4;
+    }
+
+    .back-btn:hover {
+      background: #0097a7;
+      transform: scale(1.1);
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 50px auto;
+      max-width: 1200px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #111827, #323a44);
+      border: 1px solid rgba(0, 229, 255, 0.08);
+      border-radius: 20px;
+      width: 300px;
+      padding: 30px;
+      text-align: center;
+      transition: transform 0.4s, box-shadow 0.4s;
+      box-shadow: 0 10px 25px rgba(183, 124, 124, 0.6);
+      animation: floatCard 1.5s ease-in-out;
+    }
+
+    @keyframes floatCard {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .card:hover {
+      transform: translateY(-15px) scale(1.04);
+      box-shadow: 0 25px 60px rgba(0, 188, 212, 0.25);
+    }
+
+    .card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #00bcd4;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .card:hover img {
+      transform: scale(1.1) rotate(3deg);
+    }
+
+    .card h3 {
+      margin-top: 15px;
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+
+    .card p {
+      color: #bbbbbb;
+      font-size: 0.95rem;
+      margin: 8px 0;
+    }
+
+    .social-links {
+      margin-top: 15px;
+    }
+
+    .social-links a {
+      margin: 0 5px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 0.85rem;
+      transition: 0.3s ease;
+      display: inline-block;
+    }
+
+    .insta {
+      background-color: #e13030;
+    }
+
+    .linkedin {
+      background-color: #0077b5;
+    }
+
+    .insta:hover, .linkedin:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+
+    .footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #aaaaaa;
+    }
+
+    .image-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0,0,0,0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+
+    .image-modal {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 15px;
+      border: 4px solid #00bcd4;
+      box-shadow: 0 0 30px rgba(0, 188, 212, 0.3);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      background: #00bcd4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      z-index: 10001;
+      box-shadow: 0 0 10px #00bcd4;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Meet Our Developers</h1>
+  <h2>Built with 💖 by Team Cyber Security 2023-2027</h2>
+
+  <button class="back-btn" onclick="window.location.href='settings.html'">← Back to Settings</button>
+
+  <div class="container">
+    <!-- Developer Cards -->
+    <div class="card">
+      <img src="https://i.ibb.co/6cpcLQvL/tarun-photo-for-dvelopers-page.jpg" alt="Tarun">
+      <h3>PUTTAMRAJU SAI TARUN</h3>
+      <p>Fullstack Development & Visual Experience</p>
+      <p>saitarun2005p@gmail.com</p>
+      <div class="social-links">
+        <a href="https://saitarunprofile.vercel.app/" class="insta" target="_blank">Portfolio</a>
+        <a href="https://www.linkedin.com/in/puttamraju-sai-tarun-926619349/" class="linkedin" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="https://i.ibb.co/0pdLY9nG/photo-for-developers-page.jpg" alt="Uday">
+      <h3>KADULLA UDAY CHARAN</h3>
+      <p>Full Stack Development & Data Base Administration</p>
+      <p>udaycharankadulla@gmail.com</p>
+      <div class="social-links">
+        <a href="https://udaycharankadulla.vercel.app/" class="insta" target="_blank">Portfolio</a>
+        <a href="https://www.linkedin.com/in/uday-charan-kadulla-02a96331a" class="linkedin" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="https://i.ibb.co/GQqtmxXy/bhavana-photo-for-developers-page.jpg" alt="Bhavana">
+      <h3>KALLA BHAVANA</h3>
+      <p>UI/UX Designer</p>
+      <p>bhavanakalla4@gmail.com</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/bhavana_kalla_/" class="insta" target="_blank">Instagram</a>
+        <a href="https://www.linkedin.com/in/bhavana-kalla-317765288" class="linkedin" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="https://i.ibb.co/yFf9xJg1/sharif-photo-for-developers-page.jpg" alt="Sharifunnisa">
+      <h3>SHAIK SHARIFUNNISA</h3>
+      <p>Developer</p>
+      <p>shaiksharifunnisa@gmail.com</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/afsheen_030/" class="insta" target="_blank">Instagram</a>
+        <a href="#" class="linkedin" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="https://i.ibb.co/TscGH4k/sudha-photo-for-developers-page.jpg" alt="Sudha">
+      <h3>KOMMANA SUDHA RANI</h3>
+      <p>Developer</p>
+      <p>sudharanikommana@gmail.com</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/siri_kommana_0107/" class="insta" target="_blank">Instagram</a>
+        <a href="https://www.linkedin.com/in/sudha-kommana-325754353" class="linkedin" target="_blank">LinkedIn</a>
+      </div>
+
+    </div>
+     <div class="card">
+      <img src="https://i.ibb.co/Bmmbm5p/swathika-photo-for-developers-page.jpg" alt="Swathika" >
+      <h3>PONNADA SWATHIKA</h3>
+      <p>Developer</p>
+      <p>roopaswathika9124@gmail.com</p>
+      <div class="social-links">
+        <a href="#" class="insta" target="_blank">Instagram</a>
+        <a href="https://www.linkedin.com/in/roopa-swathika-131561369" class="linkedin" target="_blank">LinkedIn</a>
+    </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2025 Sir CRR Engineering. All rights reserved.</p>
+  </div>
+
+  <!-- Script for Fullscreen Image View -->
+ <script>
+  const images = document.querySelectorAll(".card img");
+
+  images.forEach(img => {
+    img.addEventListener("click", () => {
+      // Check if a modal is already open
+      if (document.querySelector(".image-modal-overlay")) return;
+
+      // Create overlay
+      const overlay = document.createElement("div");
+      overlay.className = "image-modal-overlay";
+
+      // Create enlarged image
+      const modalImg = document.createElement("img");
+      modalImg.src = img.src;
+      modalImg.className = "image-modal";
+
+      // Close button
+      const closeBtn = document.createElement("button");
+      closeBtn.innerText = "← Back";
+      closeBtn.className = "modal-close";
+
+      // Append everything to overlay first
+      overlay.appendChild(modalImg);
+      overlay.appendChild(closeBtn);
+      document.body.appendChild(overlay);
+
+      // Close function
+      const closeModal = () => {
+        overlay.remove();
+      };
+
+      // Close on overlay click (but not when clicking image or button)
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          closeModal();
+        }
+      });
+
+      // Close on button click
+      closeBtn.addEventListener("click", closeModal);
+    });
+  });
+  
+function logout() {
+    localStorage.removeItem("userId");
+    if ("caches" in window) {
+      caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+    }
+    window.location.replace("index.html");
+  }
+</script>
+</body>
+</html>
+

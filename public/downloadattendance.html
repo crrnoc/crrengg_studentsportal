@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📥 Download Section Attendance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #2C3E50, #34495E);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      color: white;
+      z-index: 100;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #3cb6ff;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+
+    .sidebar li a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
+
+    .sidebar li.active {
+      background: rgba(255,255,255,0.3);
+      font-weight: bold;
+    }
+
+    .sidebar button {
+      background-color: #E67E22;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 20px;
+      margin-top: auto;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar button:hover {
+      background-color: #CA6F1E;
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #2C3E50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 40px;
+      margin-top: 36px;
+      transition: filter 0.3s ease;
+    }
+
+    .main.shifted {
+      filter: blur(2px);
+      pointer-events: none;
+    }
+
+    form {
+      background: white;
+      padding: 30px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button[type="submit"] {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #005e99;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { left: -250px; transition: 0.4s ease; }
+      .sidebar.open { left: 0; }
+      .mobile-toggle { display: block; }
+      .main { margin-left: 0; padding: 80px 20px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+
+<div class="sidebar" id="sidebar">
+  <h2>Admin Panel</h2>
+  <ul>
+      <li onclick="navigateTo('/uploadattendance')">🗓️ Upload Attendance</li>
+      <li onclick="navigateTo('/uploadmidmarks')">📈 Upload Mid Marks</li>
+      <li onclick="navigateTo('/addmycounselling')">👥 Assign Counselling</li>
+      <li onclick="navigateTo('/dumatch')">🔍 DU Match Status</li>
+      <li onclick="navigateTo('/removestudents')">🗑️ Delete Students</li>
+      <li onclick="navigateTo('/uploadstudents')">📚 Upload Student Data</li>
+      <li onclick="navigateTo('/staffallocation')">🧑‍🏫 Staff Period Allocation</li>
+      <li onclick="navigateTo('/downloadattendance')">📥 Download Attendance</li>
+      <li onclick="navigateTo('/editattendance')">✏️ Edit Attendance</li>
+      <li onclick="navigateTo('/sendsms')">📤 Send SMS</li>
+  </ul>
+  <button onclick="logout()">🚪 Logout</button>
+</div>
+
+<div class="main" id="main-content">
+  <h1>📊 Download Section Attendance</h1>
+  <form id="attendanceForm">
+    <label for="dept_code">Department Code</label>
+    <input type="text" id="dept_code" required placeholder="e.g. CSE" />
+
+    <label for="year">Year</label>
+    <select id="year" required>
+      <option value="">Select Year</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select>
+
+    <label for="semester">Semester</label>
+    <select id="semester" required>
+      <option value="">Select Semester</option>
+      <option value="1-1">1-1</option>
+      <option value="1-2">1-2</option>
+      <option value="2-1">2-1</option>
+      <option value="2-2">2-2</option>
+      <option value="3-1">3-1</option>
+      <option value="3-2">3-2</option>
+      <option value="4-1">4-1</option>
+      <option value="4-2">4-2</option>
+    </select>
+
+    <label for="course">Course</label>
+    <select id="course" required></select>
+
+    <label for="section">Section</label>
+    <select id="section" required></select>
+
+    <label for="from_date">From Date</label>
+    <input type="date" id="from_date" required />
+
+    <label for="to_date">To Date</label>
+    <input type="date" id="to_date" required />
+
+    <button type="submit">📥 Download Attendance PDF</button>
+  </form>
+</div>
+
+<script>
+  const deptInput = document.getElementById("dept_code");
+  const yearSelect = document.getElementById("year");
+  const courseSelect = document.getElementById("course");
+  const sectionSelect = document.getElementById("section");
+  const form = document.getElementById("attendanceForm");
+
+  async function loadCourseAndSections() {
+    const dept = deptInput.value;
+    const year = yearSelect.value;
+    if (!dept || !year) return;
+
+    try {
+      const res = await fetch(`/api/fetch-courses-sections?dept_code=${dept}&year=${year}`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error("Server responded with: " + text);
+      }
+      const data = await res.json();
+      const courses = [...new Set(data.map(d => d.course))];
+      const sections = [...new Set(data.map(d => d.section))];
+
+      courseSelect.innerHTML = courses.map(c => `<option value="${c}">${c}</option>`).join("");
+      sectionSelect.innerHTML = sections.map(s => `<option value="${s}">${s}</option>`).join("");
+    } catch (err) {
+      console.error("❌ Failed to fetch data:", err);
+      Swal.fire("Error", "Unable to fetch course/section data", "error");
+    }
+  }
+
+  deptInput.addEventListener("change", loadCourseAndSections);
+  yearSelect.addEventListener("change", loadCourseAndSections);
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const dept = deptInput.value;
+    const year = yearSelect.value;
+    const semester = document.getElementById("semester").value;
+    const course = courseSelect.value;
+    const section = sectionSelect.value;
+    const from_date = document.getElementById("from_date").value;
+    const to_date = document.getElementById("to_date").value;
+
+    if (!course || !section || !year || !from_date || !to_date || !semester) {
+      Swal.fire("⚠️", "Please fill all fields", "warning");
+      return;
+    }
+
+    const url = `/api/download-all-subjects-attendance?year=${year}&course=${encodeURIComponent(course)}&section=${section}&semester=${semester}&from_date=${from_date}&to_date=${to_date}`;
+    window.open(url, '_blank');
+  };
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main-content");
+    sidebar.classList.toggle("open");
+    main.classList.toggle("shifted");
+  }
+
+  function navigateTo(route) {
+    window.location.href = route;
+  }
+
+  function logout() {
+    fetch("/logout")
+      .then(() => {
+        localStorage.removeItem("userId");
+        window.location.replace("index.html");
+      })
+      .catch((err) => {
+        console.error("Logout failed:", err);
+        alert("Logout failed. Try again.");
+      });
+  }
+
+  // Prevent back nav after logout
+  window.history.pushState(null, "", window.location.href);
+  window.onpopstate = function () {
+    window.history.pushState(null, "", window.location.href);
+  };
+</script>
+</body>
+</html>

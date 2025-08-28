@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Notifications</title>
+  <link rel="icon" href="crrengglogo.png" type="image/png" />
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #2e2e2e;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .container {
+    display: flex;
+    min-height: 100vh;
+  }
+.photo-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+
+.home-icon {
+  margin-top: 35px;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  background-color: #fff;
+  border-radius: 50%;
+  font-size: 22px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+  color: #000;
+  transition: transform 0.2s ease;
+}
+
+.home-icon:hover {
+  transform: scale(1.1);
+  background-color: #f09000;
+  color: white;
+}
+  .sidebar {
+    width: 270px;
+    background-color: rgb(247, 201, 155);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .sidebar h2 {
+    margin: 40px 20px 20px 20px;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .sidebar-photo {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  border: 3px solid #333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+  .menu {
+    list-style: none;
+    padding: 0;
+  }
+
+  .menu li {
+    margin-bottom: 15px;
+  }
+
+  .menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    color: black;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .menu li a:hover,
+  .menu li.active a {
+    background-color: #d4d4d4;
+    font-weight: bold;
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .menu li a span {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .menu li a:hover span {
+    transform: scale(1.2);
+  }
+
+  .logout {
+    background-color: #f09000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 50%;
+    margin: 20px auto 0;
+    transition: background 0.3s ease;
+  }
+
+  .logout:hover {
+    background-color: #d07900;
+  }
+
+  .details-section {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    padding: 20px;
+    margin-left: 270px;
+    transition: margin-left 0.3s ease;
+    width: 100%;
+  }
+
+  .details-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(230, 246, 255, 0.9));
+    color: #000;
+    width: 80%;
+    max-width: 800px;
+    padding: 30px;
+    border-radius: 25px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2), 0 6px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .notification {
+    background: linear-gradient(145deg, #e3f2fd, #ffffff);
+    padding: 16px 18px;
+    margin-bottom: 15px;
+    border-left: 6px solid #2196f3;
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1.6;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+  }
+
+  .notification time {
+    display: block;
+    font-size: 13px;
+    color: #444;
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f75cb;
+    color: white;
+    font-size: 24px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    z-index: 2000;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateY(-100%);
+      width: 100%;
+      height: 90vh;
+      overflow-y: auto;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar.open {
+      transform: translateY(0%);
+    }
+
+    .details-section {
+      margin-left: 0;
+    }
+
+    .mobile-toggle {
+      display: block;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="photo-container">
+  <div class="photo-wrapper">
+    <a href="studentwelcome.html" class="home-icon" title="Home">🏠</a>
+    <img id="sidebarPhoto" class="sidebar-photo" style="display: none;" />
+  </div>
+</div>
+
+      <h2>ID: <span id="userId">Loading...</span></h2>
+      <ul class="menu">
+        <li><a href="studentdetails.html"><span>📄</span> Student details</a></li>
+        <li><a href="feedetails.html"><span>🎓</span> Fee details</a></li>
+        <li><a href="updaterefno.html"><span>🔄</span> Update fee payment</a></li>
+        <li><a href="attendence.html"><span>📅</span> View Attendance</a></li>
+        <li><a href="studentresults.html"><span>📊</span> Student Results</a></li>
+        <li><a href="generatenoc.html"><span>➕</span> Generate NOC</a></li>
+        <li class="active"><a href="settings.html"><span>⚙️</span> Settings</a></li>
+      </ul>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Notification Section -->
+    <div class="details-section">
+      <div class="details-card" id="notificationList">
+        <p>Loading notifications...</p>
+      </div>
+    </div>
+  </div>
+<div class="mobile-toggle" onclick="toggleSidebar()">☰</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // 🔐 Unauthorized login check
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Login Required',
+      text: 'Please login to access this page.'
+    }).then(() => {
+      window.location.href = "index.html";
+    });
+  } else {
+    document.getElementById("userId").textContent = userId || "Unknown";
+
+    // ✅ Load sidebar photo
+    fetch(`/student/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        const photo = document.getElementById("sidebarPhoto");
+        if (photo && data.photo_url) {
+          photo.src = data.photo_url;
+          photo.style.display = "block";
+        }
+      })
+      .catch(err => {
+        console.warn("⚠️ Failed to load photo:", err.message);
+      });
+
+    // ✅ Load notifications
+    fetch(`/notifications/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("notificationList");
+        if (!data.success || data.notifications.length === 0) {
+          list.innerHTML = "<p>No notifications found.</p>";
+          return;
+        }
+
+        list.innerHTML = "";
+        data.notifications.forEach(note => {
+          const div = document.createElement("div");
+          div.classList.add("notification");
+          div.innerHTML = `
+            <strong>From: ${note.staff_name || "System"}</strong><br>
+            ${note.message}
+            <time>${new Date(note.date_sent).toLocaleString()}</time>
+          `;
+          list.appendChild(div);
+        });
+      })
+      .catch(err => {
+        console.error("Error fetching notifications:", err);
+        document.getElementById("notificationList").innerHTML = "<p>Error loading notifications.</p>";
+      });
+  }
+
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+  }
+
+  document.querySelectorAll(".menu li a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  function logout() {
+    localStorage.removeItem('userId');
+    if ('caches' in window) {
+      caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    }
+    window.location.replace("index.html");
+  }
+</script>
+
+</body>
+</html>

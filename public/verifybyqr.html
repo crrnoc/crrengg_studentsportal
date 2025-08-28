@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NOC Verification Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      animation: slideIn 1s ease;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: linear-gradient(45deg, #00dbde, #fc00ff);
+      z-index: -1;
+      filter: blur(30px);
+      opacity: 0.5;
+      border-radius: 25px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-40px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2a2a2a;
+      margin-bottom: 15px;
+    }
+
+    #student-id {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    .status {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 14px 24px;
+      border-radius: 50px;
+      display: inline-block;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .eligible {
+      color: #1e7e34;
+      background: #d4edda;
+      border: 2px solid #28a745;
+    }
+
+    .not-eligible {
+      color: #842029;
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #999;
+      font-weight: 600;
+      animation: fadeIn 1.5s ease 0.3s both;
+    }
+
+    .footer span {
+      color: white;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 30px;
+      display: inline-block;
+      margin-top: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .status {
+        font-size: 16px;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔍 NOC Verification</h1>
+    <p id="student-id">Checking ID...</p>
+    <div id="result" class="status">Checking...</div>
+    <div class="footer">
+      This portal developed by <br>
+      <span>Cyber Team 2023–2027 Batch</span>
+    </div>
+  </div>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get("userId");
+  const isCombined = urlParams.get("combined") === "true";
+  const year = urlParams.get("year");
+
+  const studentIdPara = document.getElementById("student-id");
+  const resultDiv = document.getElementById("result");
+
+  if (!userId) {
+    studentIdPara.textContent = "❌ Missing User ID";
+    showError("❌ Invalid QR Code");
+  } else if (isCombined) {
+    studentIdPara.textContent = `User ID: ${userId} | Combined NOC`;
+
+    fetch(`/verify-combined-noc/${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) {
+          showError("❌ Error verifying combined NOC.");
+          return;
+        }
+
+        let allPaid = true;
+        let html = `<strong>📘 Year-wise Fee Status:</strong><br/><br/>`;
+        data.yearStatuses.forEach((yearStatus) => {
+          html += `${yearStatus.year} Year: ${yearStatus.status}<br/>`;
+          if (yearStatus.status.includes("❌")) allPaid = false;
+        });
+
+        if (allPaid) {
+          showSuccess("✅ Eligible for Combined NOC");
+        } else {
+          showError("❌ Not Eligible – Some dues remaining.<br><br>" + html);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        showError("❌ Failed to connect to server.");
+      });
+
+  } else if (year) {
+    studentIdPara.textContent = `User ID: ${userId} | Year: ${year}`;
+
+    fetch(`/fee-status/${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success || !data.years || !data.years[year]) {
+          showError("❌ Error fetching year-wise fee data.");
+          return;
+        }
+
+        const expected = data.years[year].expected || {};
+        const paid = data.years[year].paid || {};
+
+        let totalExpected = 0;
+        let totalPaid = 0;
+
+        Object.keys(expected).forEach((key) => {
+          totalExpected += parseFloat(expected[key] || 0);
+          totalPaid += parseFloat(paid[key] || 0);
+        });
+
+        if (totalPaid >= totalExpected && totalExpected > 0) {
+          showSuccess("✅ Eligible for NOC");
+        } else {
+          showError(`❌ Not Eligible – Dues remaining.<br><br>Total Expected: ₹${totalExpected.toFixed(2)}<br>Total Paid: ₹${totalPaid.toFixed(2)}`);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        showError("❌ Failed to connect to server.");
+      });
+
+  } else {
+    studentIdPara.textContent = "❌ Invalid Parameters";
+    showError("❌ Missing year or combined flag");
+  }
+
+  function showError(message) {
+    resultDiv.className = "status not-eligible";
+    resultDiv.innerHTML = message;
+  }
+
+  function showSuccess(message) {
+    resultDiv.className = "status eligible";
+    resultDiv.innerHTML = message;
+  }
+</script>
+
+</body>
+</html>

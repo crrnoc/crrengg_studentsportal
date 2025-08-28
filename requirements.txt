@@ -1,0 +1,4 @@
+pdfplumber==0.11.7
+pdfminer.six==20250506
+Pillow>=9.1
+pypdfium2>=4.18.0
