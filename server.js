@@ -34,6 +34,8 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // =============================
 // Base DB config
 let dbConfig = {
+  host: process.env.MYSQLHOST ,
+  port: process.env.MYSQLPORT || 3306,
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
@@ -42,19 +44,10 @@ let dbConfig = {
   queueLimit: 0
 };
 
-// 🔹 Use Cloud SQL Unix socket if deployed on Google Cloud
-if (process.env.CLOUD_SQL_CONNECTION && process.env.CLOUD_SQL_CONNECTION !== "") {
-  dbConfig.socketPath = `/cloudsql/${process.env.CLOUD_SQL_CONNECTION}`;
-} else {
-  // 🔹 Fallback to TCP (local / Render / other)
-  dbConfig.host = process.env.MYSQLHOST;
-  dbConfig.port = process.env.MYSQLPORT;
-}
-
-// ✅ Create Pool
+// ✅ Create MySQL pool
 const pool = mysql.createPool(dbConfig);
 
-// ✅ Session Store (connects via pool)
+// ✅ Session Store using pool
 const sessionStore = new MySQLStore({}, pool);
 
 app.use(session({
@@ -63,14 +56,14 @@ app.use(session({
   store: sessionStore,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 15 * 60 * 1000 }, // 15 min
+  cookie: { maxAge: 15 * 60 * 1000 }, // 15 minutes
   rolling: true
 }));
 
 // ✅ Test DB connection
 pool.getConnection((err, conn) => {
   if (err) {
-    console.error('❌ Database connection failed:', err.message);
+    console.error('❌ Database connection failed:', err);
   } else {
     console.log('✅ Connected to MySQL database');
     conn.release();
