@@ -33,16 +33,17 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // SESSION + MYSQL STORE + POOL
 // =============================
 // 🔧 Base DB config (env variables)
+// 🔧 Base DB config (Cloud Run + Cloud SQL)
 const dbConfig = {
-  host: process.env.MYSQLHOST,       // Example: '34.93.126.200' or '10.75.224.3'
-  port: process.env.MYSQLPORT || 3306,
-  user: process.env.MYSQLUSER,       // DB username
+  socketPath: `/cloudsql/${process.env.CLOUD_SQL_CONNECTION}`,  // ex: crre-student-management:asia-south1:crre
+  user: process.env.MYSQLUSER,        // DB username
   password: process.env.MYSQLPASSWORD, // DB password
   database: process.env.MYSQLDATABASE, // DB name
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 };
+
 
 // ✅ Create MySQL connection pool
 const pool = mysql.createPool(dbConfig);
