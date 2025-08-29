@@ -32,43 +32,50 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // =============================
 // SESSION + MYSQL STORE + POOL
 // =============================
-// Base DB config
-let dbConfig = {
-  host: process.env.MYSQLHOST ,
+// 🔧 Base DB config (env variables)
+const dbConfig = {
+  host: process.env.MYSQLHOST,       // Example: '34.93.126.200' or '10.75.224.3'
   port: process.env.MYSQLPORT || 3306,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
+  user: process.env.MYSQLUSER,       // DB username
+  password: process.env.MYSQLPASSWORD, // DB password
+  database: process.env.MYSQLDATABASE, // DB name
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 };
 
-// ✅ Create MySQL pool
+// ✅ Create MySQL connection pool
 const pool = mysql.createPool(dbConfig);
 
-// ✅ Session Store using pool
+// ✅ Session store using MySQL pool
 const sessionStore = new MySQLStore({}, pool);
 
 app.use(session({
   key: 'noc_sid',
-  secret: 'sircrrengg@123',
+  secret: 'sircrrengg@123',  // change in production
   store: sessionStore,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 15 * 60 * 1000 }, // 15 minutes
-  rolling: true
+  cookie: {
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    httpOnly: true,         // prevent XSS attacks
+    secure: false           // set true if using HTTPS
+  },
+  rolling: true // reset cookie expiry on each request
 }));
 
 // ✅ Test DB connection
 pool.getConnection((err, conn) => {
   if (err) {
-    console.error('❌ Database connection failed:', err);
+    console.error('❌ Database connection failed:', err.message);
   } else {
-    console.log('✅ Connected to MySQL database');
+    console.log('✅ Connected to MySQL database (pool working)');
     conn.release();
   }
 });
+
+module.exports = { pool, sessionStore };
+
 
 // ✅ Export pool for use in routes
 module.exports = pool;
