@@ -9,6 +9,7 @@ const fs = require('fs');
 const multer = require('multer');
 const adminRoutes = require("./admin");
 const MySQLStore = require('express-mysql-session')(session);
+const pool = require('./db');
 
 
 const app = express();
@@ -74,12 +75,11 @@ pool.getConnection((err, conn) => {
     conn.release();
   }
 });
-
+// ✅ Export pool for use in routes
 module.exports = { pool, sessionStore };
 
 
-// ✅ Export pool for use in routes
-module.exports = pool;
+
 
 
 // =============================
@@ -333,18 +333,24 @@ app.post('/reset-password', async (req, res) => {
 });
 
 // 👤 Get student details
-app.get('/student/:userId', (req, res) => {
+app.get('/student/:userId', async (req, res) => {
   const { userId } = req.params;
 
-  connection.query('SELECT * FROM students WHERE userId = ?', [userId], (err, results) => {
-    if (err) return res.status(500).json({ success: false, message: 'DB error' });
+  try {
+    const [results] = await pool.query(
+      'SELECT * FROM students WHERE userId = ?',
+      [userId]
+    );
 
     if (results.length === 0) {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
 
     res.json(results[0]);
-  });
+  } catch (err) {
+    console.error("❌ DB error:", err);
+    res.status(500).json({ success: false, message: 'DB error' });
+  }
 });
 
 // ✏️ Update student profile
