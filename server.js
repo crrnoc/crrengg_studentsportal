@@ -9,7 +9,6 @@ const fs = require('fs');
 const multer = require('multer');
 const adminRoutes = require("./admin");
 const MySQLStore = require('express-mysql-session')(session);
-const pool = require('./db');
 
 
 const app = express();
