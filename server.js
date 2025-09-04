@@ -255,7 +255,7 @@ app.post('/send-otp', (req, res) => {
   const { userId, email } = req.body;
 
   // First try from students
-  connection.query('SELECT email FROM students WHERE userId = ?', [userId], (err, results) => {
+  pool.query('SELECT email FROM students WHERE userId = ?', [userId], (err, results) => {
     if (err) return res.json({ success: false, message: "Server error" });
 
     if (results.length > 0 && results[0].email === email) {
@@ -263,7 +263,7 @@ app.post('/send-otp', (req, res) => {
     }
 
     // Try from staff
-    connection.query('SELECT staff_email FROM staff WHERE staff_id = ?', [userId], (err2, results2) => {
+    pool.query('SELECT staff_email FROM staff WHERE staff_id = ?', [userId], (err2, results2) => {
       if (err2 || results2.length === 0 || results2[0].staff_email !== email) {
         return res.json({ success: false, message: "User ID and email don't match." });
       }
@@ -313,7 +313,7 @@ app.post('/reset-password', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    connection.query(
+    pool.query(
       'UPDATE users SET password = ? WHERE userId = ?',
       [hashedPassword, userId],
       (err, result) => {
@@ -441,7 +441,7 @@ app.post("/editprofile", upload.single("photo"), async (req, res) => {
     sql += ` WHERE userId=?`;
     updateFields.push(userId);
 
-    connection.query(sql, updateFields, (err, result) => {
+    pool.query(sql, updateFields, (err, result) => {
       if (err) {
         console.error("❌ SQL Error:", err);
         return res.status(500).json({ message: "Profile update failed" });
@@ -485,7 +485,7 @@ app.post('/send-bulk-notification', async (req, res) => {
     console.log("📦 Processing userId:", userId);
     await new Promise(resolve => {
       const query = 'SELECT email, name FROM students WHERE userId = ?';
-      connection.query(query, [userId], (err, results) => {
+      pool.query(query, [userId], (err, results) => {
         if (err || results.length === 0) {
           console.log("❌ Student not found or DB error for:", userId, err);
           failed++;
@@ -517,7 +517,7 @@ app.post('/send-bulk-notification', async (req, res) => {
             console.log("📧 Email sent to:", student.email);
           }
 
-          connection.query(
+          pool.query(
             'INSERT INTO notifications (userId, message) VALUES (?, ?)',
             [userId, message],
             (err3) => {
@@ -553,7 +553,7 @@ app.get('/notifications/:userId', (req, res) => {
     ORDER BY n.date_sent DESC
   `;
 
-  connection.query(query, [userId], (err, results) => {
+  pool.query(query, [userId], (err, results) => {
     if (err) {
       console.error("❌ Error fetching notifications:", err);
       return res.status(500).json({ success: false, message: "Error retrieving notifications" });
@@ -578,7 +578,7 @@ app.post('/impose-fine', (req, res) => {
   `;
   const fineValues = [userId, amount, reason, staffId, academic_year];
 
-  connection.query(fineQuery, fineValues, (err, result) => {
+  pool.query(fineQuery, fineValues, (err, result) => {
     if (err) {
       console.error("❌ Error inserting fine:", err);
       return res.status(500).json({ success: false, message: "Failed to insert fine" });
@@ -589,7 +589,7 @@ app.post('/impose-fine', (req, res) => {
       INSERT INTO notifications (userId, message, staffId)
       VALUES (?, ?, ?)
     `;
-    connection.query(notifyQuery, [userId, message, staffId], (err2) => {
+    pool.query(notifyQuery, [userId, message, staffId], (err2) => {
       if (err2) {
         console.error("❌ Notification insert error:", err2);
         return res.status(500).json({ success: false, message: "Fine added, but notification failed" });
@@ -604,7 +604,7 @@ app.post('/impose-fine', (req, res) => {
 //total fine there exist before
 app.get('/total-fine/:userId', (req, res) => {
   const { userId } = req.params;
-  connection.query('SELECT SUM(amount) AS totalFine FROM fines WHERE userId = ?', [userId], (err, results) => {
+  pool.query('SELECT SUM(amount) AS totalFine FROM fines WHERE userId = ?', [userId], (err, results) => {
     if (err) {
       console.error("Error fetching fine:", err);
       return res.status(500).json({ success: false });
@@ -671,7 +671,7 @@ app.get('/paid-amounts/:userId', (req, res) => {
     GROUP BY fee_type
   `;
 
-  connection.query(sql, [userId], (err, results) => {
+  pool.query(sql, [userId], (err, results) => {
     if (err) {
       console.error("Paid amounts fetch error:", err);
       return res.status(500).json([]);
@@ -690,7 +690,7 @@ app.post("/submit-du", (req, res) => {
   }
 
   // 🧠 Step 1: Get unique_id from students table
-  connection.query(
+  pool.query(
     "SELECT uniqueId FROM students WHERE userId = ?",
     [userId],
     (err, results) => {
@@ -725,7 +725,7 @@ app.post("/submit-du", (req, res) => {
         // 🧠 Check if DU + amount exists in SBI uploaded table
         checkMatches.push(
           new Promise(resolve => {
-            connection.query(
+            pool.query(
               "SELECT * FROM sbi_uploaded_references WHERE sbi_ref_no = ? AND amount = ? AND unique_id = ?",
               [du, amt, unique_id],
               (err, results) => {
@@ -739,7 +739,7 @@ app.post("/submit-du", (req, res) => {
         // 🧠 Check if DU already exists anywhere in student_fee_payments
         duChecks.push(
           new Promise((resolve, reject) => {
-            connection.query(
+            pool.query(
               `SELECT userId, unique_id, academic_year, fee_type 
                FROM student_fee_payments 
                WHERE sbi_ref_no = ?`,
@@ -785,7 +785,7 @@ app.post("/submit-du", (req, res) => {
                 matched_on = IF(matched = 0 AND VALUES(matched) = 1, NOW(), matched_on)
             `;
 
-            connection.query(sql, [finalValues], (err2) => {
+            pool.query(sql, [finalValues], (err2) => {
               if (err2) {
                 console.error("❌ Insert error:", err2);
                 return res.status(500).json({ success: false, message: "DB error" });
@@ -819,7 +819,7 @@ app.get("/fee-structure/:reg_no", (req, res) => {
     LIMIT 1
   `;
 
-  connection.query(sql, [reg_no], (err, results) => {
+  pool.query(sql, [reg_no], (err, results) => {
     if (err) {
       console.error("DB Error:", err);
       return res.status(500).json({ success: false, message: "Database error" });
@@ -834,7 +834,7 @@ app.get("/fee-structure/:reg_no", (req, res) => {
 app.get('/noc-eligibility/:userId', (req, res) => {
   const { userId } = req.params;
 
-  connection.query('SELECT reg_no FROM students WHERE userId = ?', [userId], (err, studentRows) => {
+  pool.query('SELECT reg_no FROM students WHERE userId = ?', [userId], (err, studentRows) => {
     if (err || studentRows.length === 0) {
       return res.status(500).json({ success: false });
     }
@@ -842,7 +842,7 @@ app.get('/noc-eligibility/:userId', (req, res) => {
     const reg_no = studentRows[0].reg_no;
 
     // 1. Get latest fee structure
-    connection.query(`
+    pool.query(`
       SELECT * FROM student_fee_structure 
       WHERE reg_no = ? 
       ORDER BY updated_at DESC 
@@ -855,7 +855,7 @@ app.get('/noc-eligibility/:userId', (req, res) => {
       const feeStructure = feeRows[0];
 
       // 2. Get paid amounts from student_fee_payment
-      connection.query(`
+      pool.query(`
         SELECT fee_type, SUM(amount) AS paid 
         FROM student_fee_payment 
         WHERE reg_no = ? 
@@ -927,7 +927,7 @@ app.post('/admin/upload-sbi', upload.single('sbiFile'), (req, res) => {
         ON DUPLICATE KEY UPDATE amount = VALUES(amount), unique_id = VALUES(unique_id)
       `;
 
-      connection.query(insertQuery, [results], (err) => {
+      pool.query(insertQuery, [results], (err) => {
         if (err) {
           console.error('❌ Upload error:', err);
           return res.status(500).json({ success: false, message: 'Upload failed.' });
@@ -945,7 +945,7 @@ app.post('/admin/upload-sbi', upload.single('sbiFile'), (req, res) => {
           WHERE p.matched = 0
         `;
 
-        connection.query(matchQuery, (err2, result) => {
+        pool.query(matchQuery, (err2, result) => {
           if (err2) {
             console.error('❌ Match error:', err2);
             return res.status(500).json({ success: false, message: 'Matching failed.' });
@@ -975,7 +975,7 @@ app.get('/admin/matches', (req, res) => {
     ORDER BY f.matched_on DESC
   `;
 
-  connection.query(sql, (err, results) => {
+  pool.query(sql, (err, results) => {
     if (err) {
       console.error('Error fetching matches:', err);
       return res.status(500).json([]);
@@ -993,7 +993,7 @@ app.post('/admin/search-noc-status', (req, res) => {
   const searchTerm = `%${query}%`;
   const sql = `SELECT userId, reg_no, name FROM students WHERE userId LIKE ? OR name LIKE ?`;
 
-  connection.query(sql, [searchTerm, searchTerm], (err, results) => {
+  pool.query(sql, [searchTerm, searchTerm], (err, results) => {
     if (err) {
       console.error("❌ Search error:", err);
       return res.status(500).json({ success: false });
@@ -1003,7 +1003,7 @@ app.post('/admin/search-noc-status', (req, res) => {
       const { userId, reg_no, name } = student;
 
       return new Promise(resolve => {
-        connection.query(
+        pool.query(
           'SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY updated_at DESC LIMIT 1',
           [reg_no],
           (err2, feeRows) => {
@@ -1011,7 +1011,7 @@ app.post('/admin/search-noc-status', (req, res) => {
 
             const fees = feeRows[0];
 
-            connection.query(
+            pool.query(
               `SELECT fee_type, SUM(amount_paid) AS totalPaid 
                FROM student_fee_payments 
                WHERE userId = ? AND matched = 1 
@@ -1023,7 +1023,7 @@ app.post('/admin/search-noc-status', (req, res) => {
                 const paidMap = {};
                 paidRows.forEach(r => paidMap[r.fee_type] = parseFloat(r.totalPaid));
 
-                connection.query(
+                pool.query(
                   'SELECT SUM(amount) AS fine FROM fines WHERE userId = ?',
                   [userId],
                   (err4, fineRes) => {
@@ -1061,7 +1061,7 @@ app.post('/admin/search-noc-status', (req, res) => {
 });
 
 app.get('/admin/noc-status', (req, res) => {
-  connection.query('SELECT userId, reg_no FROM students', (err, students) => {
+  pool.query('SELECT userId, reg_no FROM students', (err, students) => {
     if (err) return res.status(500).json([]);
 
     const checks = students.map(student => {
@@ -1069,7 +1069,7 @@ app.get('/admin/noc-status', (req, res) => {
 
       return new Promise(resolve => {
         // 1️⃣ Get latest fee structure
-        connection.query(
+        pool.query(
           'SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY updated_at DESC LIMIT 1',
           [reg_no],
           (err2, feeRows) => {
@@ -1077,7 +1077,7 @@ app.get('/admin/noc-status', (req, res) => {
 
             const fees = feeRows[0];
             // 2️⃣ Get verified paid fees
-            connection.query(
+            pool.query(
               `SELECT fee_type, SUM(amount_paid) AS totalPaid 
                FROM student_fee_payments 
                WHERE userId = ? AND matched = 1 
@@ -1089,7 +1089,7 @@ app.get('/admin/noc-status', (req, res) => {
                 const paidMap = {};
                 paidRows.forEach(r => paidMap[r.fee_type] = parseFloat(r.totalPaid));
                 // 3️⃣ Get fines
-                connection.query(
+                pool.query(
                   'SELECT SUM(amount) AS fine FROM fines WHERE userId = ?',
                   [userId],
                   (err4, fineRes) => {
@@ -1140,7 +1140,7 @@ app.get("/fee-status/:userId", (req, res) => {
   // Step 1: Get reg_no from students table
   const getRegNoQuery = `SELECT reg_no FROM students WHERE userId = ?`;
 
-  connection.query(getRegNoQuery, [userId], (err, studentRows) => {
+  pool.query(getRegNoQuery, [userId], (err, studentRows) => {
     if (err) return res.status(500).json({ success: false, message: "DB error (reg_no)" });
     if (studentRows.length === 0) return res.status(404).json({ success: false, message: "Student not found" });
 
@@ -1149,7 +1149,7 @@ app.get("/fee-status/:userId", (req, res) => {
     // Step 2: Get fee structure
     const feeStructureQuery = `SELECT * FROM student_fee_structure WHERE reg_no = ?`;
 
-    connection.query(feeStructureQuery, [reg_no], (err2, feeRows) => {
+    pool.query(feeStructureQuery, [reg_no], (err2, feeRows) => {
       if (err2) return res.status(500).json({ success: false, message: "DB error (structure)" });
       if (feeRows.length === 0) return res.status(404).json({ success: false, message: "No fee structure found" });
 
@@ -1161,7 +1161,7 @@ app.get("/fee-status/:userId", (req, res) => {
         GROUP BY academic_year, fee_type
       `;
 
-      connection.query(paymentsQuery, [userId], (err3, paidRows) => {
+      pool.query(paymentsQuery, [userId], (err3, paidRows) => {
         if (err3) return res.status(500).json({ success: false, message: "DB error (payments)" });
 
         const paidMap = {};
@@ -1232,14 +1232,14 @@ app.post("/add-student", async (req, res) => {
     const sectionUpper = (section || "").toUpperCase();
 
     // Check if user already exists
-    connection.query("SELECT 1 FROM users WHERE userid = ?", [userId], async (e, r) => {
+    pool.query("SELECT 1 FROM users WHERE userid = ?", [userId], async (e, r) => {
       if (e) return res.status(500).json({ success: false });
       if (r.length) return res.status(400).json({ success: false, message: "User exists" });
 
       const hashed = await bcrypt.hash(password, 10);
 
       //  Insert into users table
-      connection.query(
+      pool.query(
         "INSERT INTO users (userid, password, role) VALUES (?, ?, 'student')",
         [userId, hashed],
         (e1) => {
@@ -1263,7 +1263,7 @@ app.post("/add-student", async (req, res) => {
             admission_type || null
           ];
 
-          connection.query(studentSql, vals, (e2) => {
+          pool.query(studentSql, vals, (e2) => {
             if (e2) {
               console.error("Student insert error:", e2);
               return res.status(500).json({ success: false });
@@ -1296,7 +1296,7 @@ app.post('/update-fee-structure', (req, res) => {
     WHERE reg_no = ? AND academic_year = ?
   `;
 
-  connection.query(queryCheck, [reg_no, academic_year], (err, result) => {
+  pool.query(queryCheck, [reg_no, academic_year], (err, result) => {
     if (err) return res.status(500).json({ success: false, message: "DB error" });
 
   const sql = result.length > 0
@@ -1312,7 +1312,7 @@ app.post('/update-fee-structure', (req, res) => {
       ? [tuition, hostel, bus, university, semester, library, fines, reg_no, academic_year]
       : [reg_no, academic_year, tuition, hostel, bus, university, semester, library, fines];
 
-   connection.query(sql, values, (err2) => {
+   pool.query(sql, values, (err2) => {
   if (err2) {
     console.error("❌ Fee update query failed:", err2.message); // this logs the actual MySQL error
     return res.status(500).json({ success: false, message: "Query failed", error: err2.message });
@@ -1335,7 +1335,7 @@ app.get('/generate-noc/:userId', (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid or missing year' });
   }
 
-  connection.query('SELECT name, course, reg_no FROM students WHERE userId = ?', [userId], (err, studentResults) => {
+  pool.query('SELECT name, course, reg_no FROM students WHERE userId = ?', [userId], (err, studentResults) => {
     if (err || studentResults.length === 0) {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
@@ -1343,7 +1343,7 @@ app.get('/generate-noc/:userId', (req, res) => {
     const student = studentResults[0];
     const reg_no = student.reg_no;
 
-    connection.query(
+    pool.query(
       'SELECT * FROM student_fee_structure WHERE reg_no = ? AND academic_year = ?',
       [reg_no, academicYear],
       (err2, feeRows) => {
@@ -1353,7 +1353,7 @@ app.get('/generate-noc/:userId', (req, res) => {
 
         const feeStructure = feeRows[0];
 
-        connection.query(
+        pool.query(
           `SELECT fee_type, SUM(amount_paid) AS paid 
            FROM student_fee_payments 
            WHERE userId = ? AND matched = 1 AND academic_year = ?
@@ -1367,7 +1367,7 @@ app.get('/generate-noc/:userId', (req, res) => {
               paidMap[row.fee_type] = parseFloat(row.paid);
             });
 
-            connection.query(
+            pool.query(
               'SELECT SUM(amount) AS fine FROM fines WHERE userId = ? AND academic_year = ?',
               [userId, academicYear],
               (err4, fineRes) => {
@@ -1518,7 +1518,7 @@ QRCode.toDataURL(qrLink, (err, qrUrl) => {
 app.get('/generate-combined-noc/:userId', (req, res) => {
   const { userId } = req.params;
 
-  connection.query('SELECT name, course, reg_no FROM students WHERE userId = ?', [userId], (err, studentRows) => {
+  pool.query('SELECT name, course, reg_no FROM students WHERE userId = ?', [userId], (err, studentRows) => {
     if (err || studentRows.length === 0) {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
@@ -1526,7 +1526,7 @@ app.get('/generate-combined-noc/:userId', (req, res) => {
     const student = studentRows[0];
     const reg_no = student.reg_no;
 
-    connection.query(`SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY academic_year ASC`, [reg_no], (err2, feeRows) => {
+    pool.query(`SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY academic_year ASC`, [reg_no], (err2, feeRows) => {
       if (err2 || feeRows.length === 0) {
         return res.status(400).json({ success: false, message: 'No fee structure found' });
       }
@@ -1535,7 +1535,7 @@ app.get('/generate-combined-noc/:userId', (req, res) => {
         const year = fee.academic_year;
 
         return new Promise(resolve => {
-          connection.query(
+          pool.query(
             `SELECT fee_type, SUM(amount_paid) AS paid 
              FROM student_fee_payments 
              WHERE userId = ? AND matched = 1 AND academic_year = ?
@@ -1545,7 +1545,7 @@ app.get('/generate-combined-noc/:userId', (req, res) => {
               const paidMap = {};
               paidRows?.forEach(row => paidMap[row.fee_type] = parseFloat(row.paid));
 
-              connection.query(
+              pool.query(
                 'SELECT SUM(amount) AS fine FROM fines WHERE userId = ? AND academic_year = ?',
                 [userId, year],
                 (err4, fineRes) => {
@@ -1663,14 +1663,14 @@ app.get('/generate-combined-noc/:userId', (req, res) => {
 app.get('/verify-combined-noc/:userId', (req, res) => {
   const { userId } = req.params;
 
-  connection.query('SELECT reg_no FROM students WHERE userId = ?', [userId], (err, result) => {
+  pool.query('SELECT reg_no FROM students WHERE userId = ?', [userId], (err, result) => {
     if (err || result.length === 0) {
       return res.json({ success: false, message: "User not found" });
     }
 
     const reg_no = result[0].reg_no;
 
-    connection.query(
+    pool.query(
       'SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY academic_year ASC',
       [reg_no],
       async (err2, feeRows) => {
@@ -1681,7 +1681,7 @@ app.get('/verify-combined-noc/:userId', (req, res) => {
         const yearStatuses = await Promise.all(feeRows.map(fee => {
           const year = fee.academic_year;
           return new Promise(resolve => {
-            connection.query(
+            pool.query(
               `SELECT fee_type, SUM(amount_paid) AS paid 
                FROM student_fee_payments 
                WHERE userId = ? AND matched = 1 AND academic_year = ?
@@ -1693,7 +1693,7 @@ app.get('/verify-combined-noc/:userId', (req, res) => {
                   paidMap[row.fee_type.toLowerCase()] = parseFloat(row.paid);
                 });
 
-                connection.query(
+                pool.query(
                   'SELECT SUM(amount) AS fine FROM fines WHERE userId = ? AND academic_year = ?',
                   [userId, year],
                   (err4, fineRes) => {
@@ -1798,7 +1798,7 @@ app.get('/student-du-entries/:userId', (req, res) => {
     ORDER BY created_at DESC
   `;
 
-  connection.query(sql, [userId], (err, results) => {
+  pool.query(sql, [userId], (err, results) => {
     if (err) {
       console.error("❌ Error fetching DU entries:", err);
       return res.status(500).json([]);
@@ -1815,7 +1815,7 @@ const sql = `SELECT id, fee_type, amount_paid, sbi_ref_no, created_at, matched
              WHERE userId = ? 
              ORDER BY created_at DESC`;
 
-  connection.query(sql, [userId], (err, results) => {
+  pool.query(sql, [userId], (err, results) => {
     if (err) {
       console.error("Fetch error:", err);
       return res.status(500).json([]);
@@ -1827,7 +1827,7 @@ const sql = `SELECT id, fee_type, amount_paid, sbi_ref_no, created_at, matched
 //  Delete a specific fee entry
 app.delete("/delete-fee-entry/:id", (req, res) => {
   const { id } = req.params;
-  connection.query("DELETE FROM student_fee_payments WHERE id = ?", [id], (err, result) => {
+  pool.query("DELETE FROM student_fee_payments WHERE id = ?", [id], (err, result) => {
     if (err) {
       console.error("Delete error:", err);
       return res.status(500).json({ success: false, message: "Delete failed." });
@@ -1861,7 +1861,7 @@ app.post('/admin/search-student-sbi', (req, res) => {
     ORDER BY f.matched_on DESC
   `;
 
-  connection.query(sql, [likeQuery, likeQuery], (err, results) => {
+  pool.query(sql, [likeQuery, likeQuery], (err, results) => {
     if (err) {
       console.error("🔥 SQL Execution Error:", err.sqlMessage);
       return res.status(500).json({ success: false, message: "Internal server error" });
@@ -1873,7 +1873,7 @@ app.post('/admin/search-student-sbi', (req, res) => {
 
 
 app.get('/admin/noc-status', (req, res) => {
-  connection.query('SELECT userId, reg_no, name FROM students', (err, students) => {
+  pool.query('SELECT userId, reg_no, name FROM students', (err, students) => {
     if (err) return res.status(500).json([]);
 
     const checks = students.map(student => {
@@ -1881,7 +1881,7 @@ app.get('/admin/noc-status', (req, res) => {
 
       return new Promise(resolve => {
         // 1️ Get latest fee structure
-        connection.query(
+        pool.query(
           'SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY updated_at DESC LIMIT 1',
           [reg_no],
           (err2, feeRows) => {
@@ -1890,7 +1890,7 @@ app.get('/admin/noc-status', (req, res) => {
             const fees = feeRows[0];
 
             // 2️Get verified paid fees
-            connection.query(
+            pool.query(
               `SELECT fee_type, SUM(amount_paid) AS totalPaid 
                FROM student_fee_payments 
                WHERE userId = ? AND matched = 1 
@@ -1903,7 +1903,7 @@ app.get('/admin/noc-status', (req, res) => {
                 paidRows.forEach(r => paidMap[r.fee_type] = parseFloat(r.totalPaid));
 
                 // Get fines
-                connection.query(
+                pool.query(
                   'SELECT SUM(amount) AS fine FROM fines WHERE userId = ?',
                   [userId],
                   (err4, fineRes) => {
@@ -1941,12 +1941,12 @@ app.get('/admin/noc-status', (req, res) => {
 app.get('/yearwise-fee/:userId', (req, res) => {
   const { userId } = req.params;
 
-  connection.query('SELECT reg_no FROM students WHERE userId = ?', [userId], (err1, regRes) => {
+  pool.query('SELECT reg_no FROM students WHERE userId = ?', [userId], (err1, regRes) => {
     if (err1 || regRes.length === 0) return res.status(500).json({ success: false });
 
     const reg_no = regRes[0].reg_no;
 
-    connection.query(
+    pool.query(
       `SELECT * FROM student_fee_structure WHERE reg_no = ? ORDER BY academic_year ASC`,
       [reg_no],
       (err2, feeRows) => {
@@ -1956,7 +1956,7 @@ app.get('/yearwise-fee/:userId', (req, res) => {
         const promises = feeRows.map(fee => new Promise(resolve => {
           const year = fee.academic_year;
 
-          connection.query(
+          pool.query(
             `SELECT fee_type, SUM(amount_paid) AS paid 
              FROM student_fee_payments 
              WHERE userId = ? AND matched = 1 AND academic_year = ?
@@ -1980,7 +1980,7 @@ app.get('/yearwise-fee/:userId', (req, res) => {
                 if (key) paidMap[key] = parseFloat(row.paid);
               });
 
-              connection.query(
+              pool.query(
                 `SELECT SUM(amount) AS fine FROM fines WHERE userId = ? AND academic_year = ?`,
                 [userId, year],
                 (err4, fineRes) => {
@@ -2012,7 +2012,7 @@ app.get("/total-backlogs", (req, res) => {
   const tableName = useRegularTable ? "results" : "autonomous_results";
 
   const query = `SELECT semester, subcode, grade, subname FROM ${tableName} WHERE regno = ?`;
-  connection.query(query, [regno], (err, results) => {
+  pool.query(query, [regno], (err, results) => {
     if (err) return res.status(500).json({ message: "Error fetching data", error: err });
 
     const isBacklog = g => ["F","ab", "AB", "ABSENT", "MP", "NOT CO", "NOTCOMPLETED"].includes((g || "").toUpperCase());
@@ -2044,7 +2044,7 @@ app.post('/delete-student', (req, res) => {
   if (!reg_no) return res.status(400).json({ success: false, message: "Registration number required." });
 
   // Step 1: get the matching userId from students
-  connection.query('SELECT userId FROM students WHERE reg_no = ?', [reg_no], (err, results) => {
+  pool.query('SELECT userId FROM students WHERE reg_no = ?', [reg_no], (err, results) => {
     if (err || results.length === 0) {
       return res.status(404).json({ success: false, message: "Student not found." });
     }
@@ -2063,7 +2063,7 @@ app.post('/delete-student', (req, res) => {
 
     let completed = 0;
     queries.forEach(([query, params]) => {
-      connection.query(query, params, (err2) => {
+      pool.query(query, params, (err2) => {
         if (err2) console.error(`Error deleting from table: ${query}`, err2);
         completed++;
         if (completed === queries.length) {
@@ -2101,7 +2101,7 @@ app.post('/delete-batch', (req, res) => {
   const sql = `SELECT reg_no, userId FROM students WHERE reg_no LIKE ? AND branch = ?`;
   const likePrefix = `${batchPrefix}%`;
 
-  connection.query(sql, [likePrefix, branch], (err, students) => {
+  pool.query(sql, [likePrefix, branch], (err, students) => {
     if (err || students.length === 0) {
       return res.status(404).json({ success: false, message: "No matching students found." });
     }
@@ -2121,7 +2121,7 @@ app.post('/delete-batch', (req, res) => {
 
       let subCompleted = 0;
       queries.forEach(([q, p]) => {
-        connection.query(q, p, (err2) => {
+        pool.query(q, p, (err2) => {
           if (err2) console.error(`Error deleting: ${q}`, err2);
           subCompleted++;
           if (subCompleted === queries.length) {
@@ -2198,7 +2198,7 @@ app.post('/upload', upload.single('pdf'), (req, res) => {
     const total = results.length;
 
     results.forEach(({ regno, subcode, subname, grade, credits }) => {
-      connection.query(
+      pool.query(
         `INSERT INTO results (regno, subcode, subname, grade, credits, semester)
          VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
@@ -2295,7 +2295,7 @@ app.post("/admin/upload-autonomous-result-pdf", upload.single("pdf"), async (req
             VALUES (?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE grade = VALUES(grade), subname = VALUES(subname), sgpa = VALUES(sgpa)
           `;
-          connection.query(query, [regno, semester, subcode, subname, grade, sgpa], (err) => {
+          pool.query(query, [regno, semester, subcode, subname, grade, sgpa], (err) => {
             if (err) console.error(`❌ DB Error [${regno} - ${subcode}]:`, err.message);
           });
 
@@ -2370,7 +2370,7 @@ app.post("/upload-attendance", upload.single("pdf"), (req, res) => {
     let inserted = 0;
     const insertPromises = records.map(([regno, sem, total, present, percent]) => {
       return new Promise((resolve) => {
-        connection.query(
+        pool.query(
           `INSERT INTO attendance 
            (regno, semester, total_classes, attended_classes, percentage) 
            VALUES (?, ?, ?, ?, ?) 
@@ -2403,7 +2403,7 @@ app.post("/upload-attendance", upload.single("pdf"), (req, res) => {
 app.get("/student-attendance/:regno", (req, res) => {
   const regno = req.params.regno;
 
-  connection.query(
+  pool.query(
     "SELECT semester, total_classes, attended_classes, percentage FROM attendance WHERE regno = ? ORDER BY semester",
     [regno],
     (err, results) => {
@@ -2426,7 +2426,7 @@ app.get('/student/results/:regno', async (req, res) => {
 
   try {
     // 1. Fetch semester-wise results from BOTH tables
-    connection.query(
+    pool.query(
       `
       SELECT subcode, subname, grade, credits 
       FROM results 
@@ -2446,7 +2446,7 @@ app.get('/student/results/:regno', async (req, res) => {
         }
 
         // 2. Fetch all results from BOTH tables for CGPA calculation
-        connection.query(
+        pool.query(
           `
           SELECT grade, credits 
           FROM results 
@@ -2577,7 +2577,7 @@ app.get("/api/verify-result", async (req, res) => {
 
   function queryAsync(sql, values) {
     return new Promise((resolve, reject) => {
-      connection.query(sql, values, (err, result) => {
+      pool.query(sql, values, (err, result) => {
         if (err) reject(err);
         else resolve(result);
       });
@@ -2652,7 +2652,7 @@ app.get("/generate-certificate/:userId", async (req, res) => {
 
   function queryAsync(sql, values) {
     return new Promise((resolve, reject) => {
-      connection.query(sql, values, (err, result) => {
+      pool.query(sql, values, (err, result) => {
         if (err) reject(err);
         else resolve(result);
       });
@@ -2975,7 +2975,7 @@ app.post("/assign-counselling", async (req, res) => {
     WHERE reg_no BETWEEN ? AND ?;
   `;
 
-  connection.query(
+  pool.query(
     query,
     [counsellorName, counsellorMobile, counsellorId, fromReg, toReg],
     (err, result) => {
@@ -3009,7 +3009,7 @@ app.get("/my-counselling-students/:staffId", (req, res) => {
     WHERE counsellor_id = ?
   `;
 
-  connection.query(query, [staffId], (err, results) => {
+  pool.query(query, [staffId], (err, results) => {
     if (err) {
       console.error("❌ Error fetching counselling students:", err);
       return res.status(500).json({ success: false, message: "Database error" });
@@ -3033,7 +3033,7 @@ app.post("/update-father-details", (req, res) => {
     WHERE reg_no = ?
   `;
 
-  connection.query(query, [father_name, father_mobile, reg_no], (err, result) => {
+  pool.query(query, [father_name, father_mobile, reg_no], (err, result) => {
     if (err) {
       console.error("❌ Error updating father details:", err);
       return res.status(500).json({ success: false, message: "Database error" });
@@ -3108,7 +3108,7 @@ app.post('/staff/update-student', (req, res) => {
     userId
   ];
 
-  connection.query(query, values, (err, result) => {
+  pool.query(query, values, (err, result) => {
     if (err) {
       console.error("❌ SQL error while updating student:", err);
       return res.status(500).json({ success: false, message: "Server error while updating student." });
@@ -3137,7 +3137,7 @@ app.get('/hod/students', (req, res) => {
   console.log("🧩 Extracted deptCode:", deptCode);
 
   // Use your existing MySQL connection (change `connection` to whatever you're using)
-  connection.query(
+  pool.query(
     `SELECT name, reg_no, course, year, section, mobile_no, email, father_name, father_mobile
      FROM students WHERE dept_code = ?`,
     [deptCode],
@@ -3190,7 +3190,7 @@ app.get("/hod/pass-fail-stats", (req, res) => {
     ORDER BY s.year, s.course, s.section
   `;
 
-  connection.query(query, params, (err, rows) => {
+  pool.query(query, params, (err, rows) => {
     if (err) {
       console.error("🔥 Error fetching pass/fail stats:", err);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -3229,7 +3229,7 @@ app.get("/hod/courses", (req, res) => {
     ORDER BY course
   `;
 
-  connection.query(query, [deptCode, year], (err, rows) => {
+  pool.query(query, [deptCode, year], (err, rows) => {
     if (err) {
       console.error("🔥 Error fetching courses:", err);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -3258,7 +3258,7 @@ app.get("/hod/sections", (req, res) => {
     ORDER BY section
   `;
 
-  connection.query(query, [deptCode, year, course], (err, rows) => {
+  pool.query(query, [deptCode, year, course], (err, rows) => {
     if (err) {
       console.error("🔥 Error fetching sections:", err);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -3294,7 +3294,7 @@ app.get("/hod/backlog-summary", (req, res) => {
     GROUP BY s.reg_no
   `;
 
-  connection.query(query, params, (err, rows) => {
+  pool.query(query, params, (err, rows) => {
     if (err) {
       console.error("🔥 Error fetching backlog summary:", err);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -3349,7 +3349,7 @@ app.post('/admin/upload-students', upload.single("studentfile"), (req, res) => {
         ON DUPLICATE KEY UPDATE password = VALUES(password)
       `;
 
-      connection.query(userQuery, [userId, userId], (userErr) => {
+      pool.query(userQuery, [userId, userId], (userErr) => {
         if (userErr) {
           console.error("❌ User insert failed:", userErr);
           return;
@@ -3397,7 +3397,7 @@ app.post('/admin/upload-students', upload.single("studentfile"), (req, res) => {
           student.counsellor_id || null
         ];
 
-        connection.query(studentQuery, values, (studentErr, result) => {
+        pool.query(studentQuery, values, (studentErr, result) => {
           if (studentErr) {
             console.error("❌ Student insert/update failed:", studentErr);
           } else {
@@ -3465,7 +3465,7 @@ app.post("/upload-midmarks", upload.single("file"), (req, res) => {
         (cc, hallticket, sub_code, mid1, a1, q1, mid2, a2, q2, lds_or_status, regulation, year, semester)
         VALUES ?
       `;
-      connection.query(sql, [results], (err) => {
+      pool.query(sql, [results], (err) => {
         fs.unlinkSync(filePath);
         if (err) return res.status(500).json({ error: err });
         res.json({ message: "✅ CSV Data inserted", count: results.length });
@@ -3486,7 +3486,7 @@ const sql = `
 `;
 
 
-  connection.query(sql, [regno, year, semester], (err, rows) => {
+  pool.query(sql, [regno, year, semester], (err, rows) => {
     if (err) {
       console.error("❌ Error fetching mid marks:", err);
       return res.status(500).json({ error: "DB error while fetching mid marks" });
@@ -3529,7 +3529,7 @@ app.get("/api/midmarks/search", (req, res) => {
       AND TRIM(semester) = ?
   `;
 
-  connection.query(sql, [regno, year, semester], (err, results) => {
+  pool.query(sql, [regno, year, semester], (err, results) => {
     if (err) {
       console.error("❌ DB Error:", err);
       return res.status(500).json({ error: "Internal Server Error" });
@@ -3550,7 +3550,7 @@ app.post('/api/notifications/send', (req, res) => {
   const sql = 'INSERT INTO notifications (staffId, message) VALUES (?, ?)';
   const values = [userId, message];
 
-  connection.query(sql, values, (err, results) => {
+  pool.query(sql, values, (err, results) => {
     if (err) {
       console.error('❌ DB Error:', err);
       return res.status(500).json({ success: false, message: 'Database error' });
@@ -3566,7 +3566,7 @@ app.get('/student/notifications/:userId', (req, res) => {
 
   const getDeptQuery = `SELECT dept_code FROM students WHERE userId = ?`;
 
-  connection.query(getDeptQuery, [userId], (err, deptResult) => {
+  pool.query(getDeptQuery, [userId], (err, deptResult) => {
     if (err) {
       console.error('❌ Error fetching department:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -3587,7 +3587,7 @@ app.get('/student/notifications/:userId', (req, res) => {
       ORDER BY date_sent DESC
     `;
 
-    connection.query(getNotificationsQuery, [deptHOD], (err, notificationsResult) => {
+    pool.query(getNotificationsQuery, [deptHOD], (err, notificationsResult) => {
       if (err) {
         console.error('❌ Error fetching notifications:', err);
         return res.status(500).json({ error: 'Database error' });
@@ -3601,7 +3601,7 @@ app.get('/student/notifications/:userId', (req, res) => {
 
 app.get('/api/departments', (req, res) => {
   const sql = 'SELECT DISTINCT dept_code FROM students';
-  connection.query(sql, (err, result) => {
+  pool.query(sql, (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch departments' });
     res.json(result);
   });
@@ -3611,7 +3611,7 @@ app.get('/api/departments', (req, res) => {
 app.get('/api/years/:dept_code', (req, res) => {
   const dept_code = req.params.dept_code;
   const sql = 'SELECT DISTINCT year FROM students WHERE dept_code = ?';
-  connection.query(sql, [dept_code], (err, result) => {
+  pool.query(sql, [dept_code], (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch years' });
     res.json(result);
   });
@@ -3620,7 +3620,7 @@ app.get('/api/years/:dept_code', (req, res) => {
 app.get('/api/courses-by-year', (req, res) => {
   const { dept_code, year } = req.query;
   const sql = 'SELECT DISTINCT course FROM students WHERE dept_code = ? AND year = ?';
-  connection.query(sql, [dept_code, year], (err, result) => {
+  pool.query(sql, [dept_code, year], (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch courses' });
     res.json(result);
   });
@@ -3632,7 +3632,7 @@ app.get('/api/sections', (req, res) => {
     SELECT DISTINCT section FROM students 
     WHERE dept_code = ? AND year = ? AND course = ?
   `;
-  connection.query(sql, [dept_code, year, course], (err, result) => {
+  pool.query(sql, [dept_code, year, course], (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch sections' });
     res.json(result);
   });
@@ -3641,7 +3641,7 @@ app.get('/api/sections', (req, res) => {
 app.get('/api/staff/:id', (req, res) => {
   const staffId = req.params.id;
   const sql = 'SELECT staff_name FROM staff WHERE staff_id = ?';
-  connection.query(sql, [staffId], (err, result) => {
+  pool.query(sql, [staffId], (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch staff' });
     if (result.length === 0) return res.status(404).json({ error: 'Staff not found' });
     res.json(result[0]);
@@ -3665,7 +3665,7 @@ app.post("/api/allocate", (req, res) => {
     WHERE staff_id = ? AND day = ?
   `;
 
-  connection.query(checkSql, [staff_id, day], (err, rows) => {
+  pool.query(checkSql, [staff_id, day], (err, rows) => {
     if (err) {
       console.error("❌ Error checking for conflicts:", err);
       return res.status(500).json({ success: false, error: "Database error" });
@@ -3710,7 +3710,7 @@ app.post("/api/allocate", (req, res) => {
       period4, period5, period6, period7
     ];
 
-    connection.query(insertSql, values, (err, result) => {
+    pool.query(insertSql, values, (err, result) => {
       if (err) {
         console.error("❌ Allocation insert error:", err);
         return res.status(500).json({ success: false, error: "Database error" });
@@ -3749,7 +3749,7 @@ app.get("/api/staff-allocation", (req, res) => {
     )
   `;
 
-  connection.query(sql, [staff_id, staff_id, date], (err, result) => {
+  pool.query(sql, [staff_id, staff_id, date], (err, result) => {
     if (err) {
       console.error("❌ Error fetching allocations:", err);
       return res.status(500).json({ error: "Internal server error" });
@@ -3773,7 +3773,7 @@ app.get("/api/students-by-course-section", (req, res) => {
     ORDER BY reg_no
   `;
 
-  connection.query(sql, [year, semester, course, section], (err, result) => {
+  pool.query(sql, [year, semester, course, section], (err, result) => {
     if (err) {
       console.error("❌ Error fetching students:", err);
       return res.status(500).json({ error: "Failed to fetch students" });
@@ -3808,7 +3808,7 @@ app.post('/api/submit-attendance', (req, res) => {
     VALUES ?
   `;
 
-  connection.query(sql, [values], (err, result) => {
+  pool.query(sql, [values], (err, result) => {
     if (err) {
       console.error("❌ Attendance insert failed:", err);
       return res.status(500).json({ success: false, message: "Database error" });
@@ -3851,7 +3851,7 @@ app.get("/api/get-period-info", (req, res) => {
     subject, subject, subject, subject, subject, subject
   ];
 
-  connection.query(sql, params, (err, result) => {
+  pool.query(sql, params, (err, result) => {
     if (err) {
       console.error("Error:", err);
       return res.status(500).json({ error: "Database error" });
@@ -3881,7 +3881,7 @@ app.get("/api/students-by-course-section", (req, res) => {
     ORDER BY reg_no
   `;
 
-  connection.query(sql, [year, semester, course, section], (err, result) => {
+  pool.query(sql, [year, semester, course, section], (err, result) => {
     if (err) {
       console.error("❌ Error fetching students:", err);
       return res.status(500).json({ error: "Failed to fetch students" });
@@ -3901,7 +3901,7 @@ app.get('/api/staff/semesters/:staffId', (req, res) => {
       FIELD(semester, '1-1', '1-2', '2-1', '2-2', '3-1', '3-2', '4-1', '4-2')
   `;
 
-  connection.query(sql, [staffId], (err, results) => {
+  pool.query(sql, [staffId], (err, results) => {
     if (err) {
       console.error("Error fetching semesters:", err);
       return res.status(500).json({ error: "Database error" });
@@ -3939,7 +3939,7 @@ app.get("/api/download-attendance-pdf", (req, res) => {
     ORDER BY a.reg_no, a.subject
   `;
 
-  connection.query(
+  pool.query(
     query,
     [year, semester, course, section, ...subjects, from_date, to_date],
     (err, results) => {
@@ -4161,7 +4161,7 @@ app.get("/api/fetch-courses-sections", (req, res) => {
     WHERE dept_code = ? AND year = ?
   `;
 
-  connection.query(sql, [dept_code, year], (err, results) => {
+  pool.query(sql, [dept_code, year], (err, results) => {
     if (err) {
       console.error("❌ DB error:", err);
       return res.status(500).json({ error: "DB error" });
@@ -4202,7 +4202,7 @@ app.get("/api/download-all-subjects-attendance", (req, res) => {
     ORDER BY a.reg_no, a.subject
   `;
 
-  connection.query(query, [year, course, section, semester, from_date, to_date], (err, results) => {
+  pool.query(query, [year, course, section, semester, from_date, to_date], (err, results) => {
     if (err) {
       console.error("DB error:", err);
       return res.status(500).json({ error: "DB error" });
@@ -4444,7 +4444,7 @@ app.get("/api/fetch-courses-sections", (req, res) => {
     WHERE dept_code = ? AND year = ?
     ORDER BY course, section
   `;
-  connection.query(query, [dept_code, year], (err, rows) => {
+  pool.query(query, [dept_code, year], (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
     // return as array of { course, section }
     res.json(rows);
@@ -4463,7 +4463,7 @@ app.get("/api/get-absents", (req, res) => {
       AND a.status = 'Absent'
     ORDER BY s.reg_no
   `;
-  connection.query(q, [year, course, section, date], (err, rows) => {
+  pool.query(q, [year, course, section, date], (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
     res.json(rows); // each row has attendance id (a.id) — important for updates
   });
@@ -4479,7 +4479,7 @@ app.post("/api/mark-present", (req, res) => {
     if (err) return res.status(500).json({ error: "DB error" });
 
     const checkQ = `SELECT status FROM daily_attendance WHERE id = ? FOR UPDATE`;
-    connection.query(checkQ, [attendance_id], (err, rows) => {
+    pool.query(checkQ, [attendance_id], (err, rows) => {
       if (err) return connection.rollback(() => res.status(500).json({ error: "DB error" }));
       if (!rows.length) return connection.rollback(() => res.status(404).json({ error: "Not found" }));
       if (rows[0].status === "Present") {
@@ -4487,7 +4487,7 @@ app.post("/api/mark-present", (req, res) => {
       }
 
       const updQ = `UPDATE daily_attendance SET status = 'Present' WHERE id = ?`;
-      connection.query(updQ, [attendance_id], (err, result) => {
+      pool.query(updQ, [attendance_id], (err, result) => {
         if (err) return connection.rollback(() => res.status(500).json({ error: "DB error" }));
         connection.commit(err => {
           if (err) return connection.rollback(() => res.status(500).json({ error: "DB error" }));
@@ -4557,7 +4557,7 @@ app.post("/api/set-staff-allocation", (req, res) => {
   let hasError = false;
 
   queries.forEach(({ sql, values }) => {
-    connection.query(sql, values, (err) => {
+    pool.query(sql, values, (err) => {
       if (err) {
         console.error("❌ Error inserting/updating allocation:", err);
         hasError = true;
@@ -4661,7 +4661,7 @@ app.post("/api/allocate/multi", (req, res) => {
   }
 
   // ✅ Insert staff_period_allocation rows
-  connection.query(sql, [values], async (err, result) => {
+  pool.query(sql, [values], async (err, result) => {
     if (err) {
       console.error("❌ Error inserting multiple allocations:", err);
       return res.status(500).json({ error: "Failed to insert allocations" });
@@ -4673,7 +4673,7 @@ app.post("/api/allocate/multi", (req, res) => {
         const q = dateQueries[i];
         const values = dateValuesList[i];
         await new Promise((resolve, reject) => {
-          connection.query(q, values, (err2, result2) => {
+          pool.query(q, values, (err2, result2) => {
             if (err2) reject(err2);
             else resolve(result2);
           });
@@ -4702,7 +4702,7 @@ app.post('/api/get-students-for-sms', (req, res) => {
   if (section) { sql += ` AND section = ?`; params.push(section); }
   if (reg_from && reg_to) { sql += ` AND reg_no BETWEEN ? AND ?`; params.push(reg_from, reg_to); }
 
-  connection.query(sql, params, (err, rows) => {
+  pool.query(sql, params, (err, rows) => {
     if (err) return res.status(500).json({ success: false, message: 'DB error', error: err.message });
     res.json({ success: true, data: rows });
   });
@@ -4800,7 +4800,7 @@ app.post("/api/send-sms", async (req, res) => {
 
     
     const rows = await new Promise((resolve, reject) => {
-      connection.query(sql, [reg_nos], (err, results) => {
+      pool.query(sql, [reg_nos], (err, results) => {
         if (err) return reject(err);
         resolve(results);
       });
@@ -4869,7 +4869,7 @@ app.post("/api/adjust-period", (req, res) => {
     LIMIT 1
   `;
 
-  connection.query(
+  pool.query(
     checkSql,
     [period_no, to_staff_id, day, course, year, semester, section],
     (err, result) => {
@@ -4889,7 +4889,7 @@ app.post("/api/adjust-period", (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
-      connection.query(
+      pool.query(
         insertSql,
         [from_staff_id, to_staff_id, course, year, section, semester, day, date, period_no, subject],
         (insertErr) => {
@@ -4911,7 +4911,7 @@ app.get("/api/staff-in-section", (req, res) => {
     JOIN staff s ON s.staff_id = spa.staff_id
     WHERE spa.course=? AND spa.year=? AND spa.semester=? AND spa.section=?;
   `;
-  connection.query(sql, [course, year, semester, section], (err, rows) => {
+  pool.query(sql, [course, year, semester, section], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
@@ -4964,7 +4964,7 @@ app.get("/api/staff-subjects", (req, res) => {
     staff_id, course, year, semester, section
   ];
 
-  connection.query(sql, params, (err, rows) => {
+  pool.query(sql, params, (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
     res.json(rows);
   });
